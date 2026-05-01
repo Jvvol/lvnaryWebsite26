@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LVNARY</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Blanka&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+    <div id="stars"></div>
+
+    <nav id="nav">
+      <a href="#home" class="nav-logo">LVNARY</a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#music">Music</a></li>
+        <li><a href="#shows">Shows</a></li>
+        <li><a href="#merch">Merch</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+
+      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+
+    <section id="home">
+      <div class="hero-bg" id="heroBg"></div>
+      <div class="hero-gradient"></div>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow">Progressive Post-Hardcore · Morgantown, WV</p>
+
+        <h1 class="hero-title">LVNARY</h1>
+
+        <p class="hero-sub">looh · nuh · ree</p>
+
+        <div class="hero-cta">
+          <a href="#music" class="btn btn-primary">Listen Now</a>
+          <a href="#shows" class="btn btn-outline">Upcoming Shows</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="music">
+  <div class="section-inner">
+    <p class="section-label reveal">Latest Release</p>
+    <h2 class="section-title reveal">Music</h2>
+
+    <div class="music-card reveal">
+      <div class="music-info">
+        <div class="song-title">Temporary</div>
+        <div class="song-meta">Single · 2024 · LVNARY</div>
+
+        <p>Stream our debut single on your favorite platform.</p>
+
+        <div class="platform-links">
+          <!--
+          <a href="#bandcamp-link-here" target="_blank" class="platform-btn bandcamp">
+            Bandcamp
+          </a>
+        -->
+
+          <a href="https://open.spotify.com/artist/7sxtSVf5y0xRBdAt0whc6c" target="_blank" class="platform-btn spotify">
+            Spotify
+          </a>
+
+          <a href="https://music.apple.com/us/artist/lvnary/1811268474" target="_blank" class="platform-btn apple-music">
+            Apple Music
+          </a>
+
+          <a href="https://music.youtube.com/channel/UCtNkpKaiNgJXASynEbZW-5g" target="_blank" class="platform-btn youtube-music">
+            YouTube Music
+          </a>
+
+          <a href="https://music.amazon.com/artists/B08RSMM82K/lvnary" target="_blank" class="platform-btn amazon-music">
+            Amazon Music
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <div class="divider"></div>
+
+    <section id="shows">
+      <div class="section-inner">
+        <p class="section-label reveal">Live</p>
+        <h2 class="section-title reveal">Shows</h2>
+
+        <div class="shows-list" id="showsList">
+          <div class="show-row reveal" data-month="MAY" data-day="29" data-venue="Declan's Room" data-location="Morgantown, WV" data-tickets></div>
+          <div class="show-row reveal" data-month="JUNE" data-day="20" data-venue="Kevin Barr Event Center" data-location="Saint Clairsville, OH" data-tickets></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="merch">
+      <div class="section-inner">
+        <p class="section-label reveal">Store</p>
+        <h2 class="section-title reveal">Merch</h2>
+
+        <div class="merch-cta reveal">
+          <p class="merch-desc">
+            Browse our latest gear, apparel, and limited drops.
+          </p>
+
+          <a href="https://lvnary.bigcartel.com" target="_blank" class="btn btn-primary merch-btn">
+            Shop Merch →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="about">
+      <div class="section-inner">
+        <p class="section-label reveal">The Band</p>
+        <h2 class="section-title reveal">About</h2>
+
+        <div class="about-stack">
+          <div class="about-img-wrap reveal">
+            <img src="images/band/band-live.jpg" alt="LVNARY live on stage">
+          </div>
+
+          <div class="about-text reveal">
+            <p class="bio">
+              LVNARY (looh-nuh-ree) is a progressive post-hardcore band born out of Morgantown, WV.
+              Blending the intricate grooves of math rock, the emotional intensity of post-hardcore,
+              and the fluid sophistication of swancore and fusion, LVNARY carves out a sonic identity
+              that’s entirely their own.
+            </p>
+
+            <p class="bio">
+              Built for listeners who want music that challenges and grooves in equal measure.
+            </p>
+
+            <section class="meet-band">
+              <h3 class="meet-title">Meet the Band</h3>
+
+              <div class="band-container">
+                <div class="member">
+                  <img src="images/band/jacob-wolfe.jpg" alt="Jacob Wolfe">
+                  <h4>Jacob Wolfe</h4>
+                  <p class="role">Guitar/Vocals</p>
+
+                  <div class="socials">
+                    <a href="https://instagram.com/jacobwolfe_17" target="_blank">
+                      <img src="images/socials/instagram.svg" alt="Instagram">
+                    </a>
+
+                    <a href="https://www.tiktok.com/@jacobwolfe_17">
+                      <img src="images/socials/tiktok.svg" alt="TikTok">
+                    </a>
+
+                    <a href="https://www.youtube.com/@jacobwolfe17">
+                      <img src="images/socials/youtube.svg" alt="YouTube">
+                    </a>
+                  </div>
+                </div>
+
+                <div class="member">
+                  <img src="images/band/james-kawasaki.jpg" alt="James Kawasaki">
+                  <h4>James Kawasaki</h4>
+                  <p class="role">Drums</p>
+
+                  <div class="socials">
+                    <a href="https://www.instagram.com/jkawasaki328/?hl=en">
+                      <img src="images/socials/instagram.svg" alt="Instagram">
+                    </a>
+
+                    <a href="https://www.tiktok.com/@james.jk.328">
+                      <img src="images/socials/tiktok.svg" alt="TikTok">
+                    </a>
+                  </div>
+                </div>
+
+                <div class="member">
+                  <img src="images/band/ave-stimeling.jpg" alt="Ave Stimeling">
+                  <h4>Ave Stimeling</h4>
+                  <p class="role">Bass</p>
+
+                  <div class="socials">
+                    <a href="https://www.instagram.com/0.8773366290018489757891768958/">
+                      <img src="images/socials/instagram.svg" alt="Instagram">
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="fans-of">
+              <div class="label">For Fans Of</div>
+
+              <div class="tags">
+                <span class="tag">Polyphia</span>
+                <span class="tag">Dance Gavin Dance</span>
+                <span class="tag">Unprocessed</span>
+                <span class="tag">Saosin</span>
+              </div>
+            </div>
+
+            <div class="band-socials-wrap">
+              <p class="socials-label">Follow the Band</p>
+
+              <div class="socials band-socials">
+                <a href="https://www.instagram.com/wearelvnary/" target="_blank">
+                  <img src="images/socials/instagram.svg" alt="Instagram">
+                </a>
+
+                <a href="https://www.tiktok.com/@lvnary" target="_blank">
+                  <img src="images/socials/tiktok.svg" alt="TikTok">
+                </a>
+
+                <a href="https://www.facebook.com/lunarybandofficial/" target="_blank">
+                  <img src="images/socials/facebook.svg" alt="Facebook">
+                </a>
+
+                <a href="https://www.youtube.com/@LVNARY-304" target="_blank">
+                  <img src="images/socials/youtube.svg" alt="YouTube">
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-logo">LVNARY</div>
+      <div class="footer-copy">© 2025 LVNARY · Morgantown, WV</div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
