@@ -181,6 +181,85 @@ function renderShows(listEl) {
   });
 }
 
+// ── MAILING LIST SIGNUP ──
+// Posts straight to the mailing-list provider; no provider script runs on this site.
+function initSignup(form) {
+  if (!form) return;
+  const email = form.elements.email_address;
+  const consent = form.elements.consent;
+  const button = form.querySelector('button[type="submit"]');
+  const status = form.querySelector('[role="status"]');
+  const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const setError = (field, message) => {
+    const error = document.getElementById(`${field.id}-error`);
+    error.textContent = message;
+    error.hidden = !message;
+    if (message) {
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute('aria-describedby', error.id);
+    } else {
+      field.removeAttribute('aria-invalid');
+      field.removeAttribute('aria-describedby');
+    }
+  };
+
+  const setStatus = (message, tone = '') => {
+    status.textContent = message;
+    status.dataset.tone = tone;
+  };
+
+  const setBusy = busy => {
+    button.disabled = busy;
+    button.textContent = busy ? 'Subscribing…' : 'Subscribe';
+  };
+
+  const validate = () => {
+    const value = email.value.trim();
+    const emailError = !value ? 'Enter your email address.'
+      : !EMAIL_PATTERN.test(value) ? 'Enter an email address like name@example.com.'
+      : '';
+    const consentError = consent.checked ? '' : "Check the box to confirm you're 16 or older and want our emails.";
+    setError(email, emailError);
+    setError(consent, consentError);
+    if (emailError) email.focus();
+    else if (consentError) consent.focus();
+    return !emailError && !consentError;
+  };
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    setStatus('');
+    if (!validate()) return;
+
+    if (form.getAttribute('action').includes('[TODO')) {
+      setStatus('Signup opens soon. Follow us on Instagram for news in the meantime.');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      form.reset();
+      setStatus('Check your inbox to confirm your subscription.', 'success');
+    } catch (err) {
+      if (err instanceof TypeError) {
+        // The provider refused a cross-site request: fall back to a normal form post.
+        form.submit();
+        return;
+      }
+      setStatus('Something went wrong on our end. Try again in a minute.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  });
+}
+
 // ── FOOTER YEAR ──
 function initYear() {
   document.querySelectorAll('[data-year]').forEach(n => { n.textContent = String(new Date().getFullYear()); });
@@ -190,4 +269,5 @@ initNav();
 initStarfield(document.querySelector('.starfield'));
 initHeroParallax();
 renderShows(document.getElementById('showsList'));
+initSignup(document.getElementById('signup'));
 initYear();

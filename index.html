@@ -179,6 +179,29 @@
         <div class="section-inner">
           <h2 class="section-title" id="signup-title">Mailing list</h2>
           <p class="lede">New music, show dates, and merch drops, a few times a year.</p>
+
+          <!-- [TODO: mailing list provider form URL] Replace the action with your provider's form endpoint
+               (for Kit: https://app.kit.com/forms/YOUR_FORM_ID/subscriptions). Turn on double opt-in at the provider. -->
+          <form id="signup" class="signup" method="post" action="[TODO: mailing list provider form URL]" novalidate>
+            <div class="field">
+              <label for="signup-email">Email address</label>
+              <input id="signup-email" name="email_address" type="email" autocomplete="email" inputmode="email" required>
+              <p class="field-error" id="signup-email-error" hidden></p>
+            </div>
+
+            <div class="field field-check">
+              <input id="signup-consent" name="consent" type="checkbox" value="yes" required>
+              <label for="signup-consent">I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.</label>
+              <p class="field-error" id="signup-consent-error" hidden></p>
+            </div>
+
+            <p class="signup-privacy">We only use your email to send these updates. <a href="/privacy/">Privacy policy</a></p>
+
+            <div class="signup-submit">
+              <button type="submit" class="btn btn-primary">Subscribe</button>
+              <p class="signup-status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
         </div>
       </section>
     </main>
