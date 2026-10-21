@@ -158,3 +158,16 @@ test('banner and settings dialog have no WCAG 2.1 AA violations', async ({ page 
   await expect(page.getByRole('dialog')).toBeVisible();
   expect(await scan()).toEqual([]);
 });
+
+test('a saved accept-all choice does not override Global Privacy Control', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(Navigator.prototype, 'globalPrivacyControl', { get: () => true });
+    localStorage.setItem('lvnary-consent', JSON.stringify({
+      version: 1, timestamp: '2026-01-01T00:00:00Z',
+      categories: { necessary: true, analytics: true, marketing: true, functional: true },
+    }));
+  });
+  const hits = await trackGated(page);
+  await page.goto(FIXTURE, { waitUntil: 'networkidle' });
+  expect(hits).toEqual(['/analytics.js']);
+});

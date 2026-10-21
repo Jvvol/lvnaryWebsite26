@@ -52,7 +52,8 @@
     const all = [...document.querySelectorAll('[data-consent]')];
     return OPTIONAL.filter(id => all.some(el => el.dataset.consent === id));
   };
-  const granted = id => id === 'necessary' || Boolean(current && current.categories[id]);
+  // GPC always wins, even over a choice saved before the signal was turned on.
+  const granted = id => id === 'necessary' || (!(gpc && id === 'marketing') && Boolean(current && current.categories[id]));
 
   function activate() {
     gatedElements().forEach(el => {

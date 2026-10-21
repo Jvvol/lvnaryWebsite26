@@ -250,12 +250,11 @@ function initSignup(form) {
       form.reset();
       setStatus('Check your inbox to confirm your subscription.', 'success');
     } catch (err) {
-      if (err instanceof TypeError) {
-        // The provider refused a cross-site request: fall back to a normal form post.
-        form.submit();
-        return;
-      }
-      setStatus('Something went wrong on our end. Try again in a minute.', 'error');
+      // fetch throws TypeError when the request can't complete (offline, or the provider
+      // doesn't send CORS headers). Never resubmit: the provider may already have the signup.
+      setStatus(err instanceof TypeError
+        ? "We couldn't reach the signup service. Check your connection and try again."
+        : 'Something went wrong on our end. Try again in a minute.', 'error');
     } finally {
       setBusy(false);
     }

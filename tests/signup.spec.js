@@ -87,3 +87,16 @@ test('provider error lets you retry', async ({ page }) => {
   await expect(submit(page)).toBeEnabled();
   await expect(submit(page)).toHaveText('Subscribe');
 });
+
+test('network failure shows a retry message and stays on the page', async ({ page }) => {
+  let posts = 0;
+  await page.route(PROVIDER, route => { posts++; route.abort('internetdisconnected'); });
+  await useProvider(page);
+  await email(page).fill('fan@example.com');
+  await consent(page).check();
+  await submit(page).click();
+  await expect(status(page)).toHaveText("We couldn't reach the signup service. Check your connection and try again.");
+  expect(new URL(page.url()).pathname).toBe('/');
+  expect(posts).toBe(1);
+  await expect(submit(page)).toBeEnabled();
+});

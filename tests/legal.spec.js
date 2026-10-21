@@ -68,3 +68,12 @@ test('missing pages show the styled 404', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page drifted out of orbit.');
   await expect(page.getByRole('link', { name: 'Back to the home page' })).toHaveAttribute('href', '/');
 });
+
+test('policy statements are accurate', async ({ page }) => {
+  await page.goto('/terms/');
+  await expect(page.locator('main')).toContainText('United States District Court for the Northern District of West Virginia');
+  await page.goto('/privacy/');
+  await expect(page.locator('main')).toContainText('Restrict or object to how we use your information');
+  await page.goto('/accessibility/');
+  await expect(page.locator('main')).not.toContainText('by hand');
+});

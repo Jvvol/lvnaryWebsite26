@@ -423,6 +423,11 @@ main:focus { outline: none; }
 .signup-status[data-tone="success"] { color: var(--c-success); }
 .signup-status[data-tone="error"] { color: var(--c-danger); }
 
+/* Signup and cookie settings need JavaScript; hide them rather than show dead controls. */
+html:not(.js) #signup,
+html:not(.js) [data-open-consent] { display: none; }
+.js .nojs-only { display: none; }
+
 /* ── FOOTER ── */
 /* Footer bookends the hero: the ridge rises again and the wordmark closes the page. */
 .site-footer { position: relative; background: var(--c-ridge); margin-top: clamp(5rem, 14vw, 10rem); }

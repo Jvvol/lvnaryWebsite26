@@ -97,3 +97,13 @@ test('new-tab links are safe and announced', async ({ page }) => {
     expect(l.name).toContain('opens in new tab');
   }
 });
+
+test('without JavaScript, the placeholder signup and cookie settings are hidden', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL: ORIGIN });
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.locator('#signup')).toBeHidden();
+  await expect(page.locator('#mailing-list')).toContainText('Signup needs JavaScript');
+  await expect(page.getByRole('button', { name: 'Cookie settings' })).toBeHidden();
+  await context.close();
+});
