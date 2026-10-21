@@ -1,85 +1,193 @@
-    // ── STARS ──
-    const starsEl = document.getElementById('stars');
-    for (let i = 0; i < 180; i++) {
-      const s = document.createElement('div');
-      s.className = 'star';
-      const size = Math.random() * 2.2 + 0.5;
-      s.style.cssText = `
-        width:${size}px; height:${size}px;
-        top:${Math.random()*100}%; left:${Math.random()*100}%;
-        --dur:${2+Math.random()*5}s; --op:${0.2+Math.random()*0.7};
-        animation-delay:${Math.random()*5}s;
-      `;
-      starsEl.appendChild(s);
+// ── LVNARY site script ──
+// Progressive enhancement only: every section and link works without this file.
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+// ── NAV ──
+function initNav() {
+  const header = document.getElementById('siteHeader');
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.getElementById('nav-links');
+  if (!header || !toggle || !links) return;
+
+  const setOpen = open => {
+    toggle.setAttribute('aria-expanded', String(open));
+    links.classList.toggle('open', open);
+  };
+
+  toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
     }
+  });
 
-    // ── CURSOR ──
-    const cursor = document.getElementById('cursor');
-    const ring = document.getElementById('cursorRing');
-    let mx=0, my=0, rx=0, ry=0;
-    document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; cursor.style.left=mx+'px'; cursor.style.top=my+'px'; });
-    (function animRing() {
-      rx += (mx-rx)*0.12; ry += (my-ry)*0.12;
-      ring.style.left=rx+'px'; ring.style.top=ry+'px';
-      requestAnimationFrame(animRing);
-    })();
+  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
-    // ── NAV SCROLL ──
-    const nav = document.getElementById('nav');
-    const sections = document.querySelectorAll('section[id]');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 40);
-      const links = document.querySelectorAll('.nav-links a');
-      let cur = '';
-      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id; });
-      links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#'+cur));
+  // Highlight the nav link for the section in view.
+  const navLinks = [...links.querySelectorAll('a[href^="#"]')];
+  const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${entry.target.id}`));
     });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  sections.forEach(s => io.observe(s));
+}
 
-    // ── MOBILE MENU ──
-    function toggleMenu() {
-      document.getElementById('navLinks').classList.toggle('open');
+// ── STARFIELD ──
+function initStarfield(canvas) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+  let width = 0;
+  let height = 0;
+  let running = false;
+  let visible = true;
+
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const count = Math.round(Math.min(160, (width * height) / 6000));
+    stars = Array.from({ length: count }, () => ({
+      x: Math.random() * width,
+      // Denser toward the top, like a sky over the ridges.
+      y: Math.pow(Math.random(), 1.6) * height * 0.85,
+      r: Math.random() * 1.3 + 0.3,
+      base: Math.random() * 0.6 + 0.25,
+      speed: Math.random() * 0.0012 + 0.0004,
+      phase: Math.random() * Math.PI * 2,
+      drift: Math.random() * 0.004 + 0.001,
+    }));
+  };
+
+  const draw = t => {
+    ctx.clearRect(0, 0, width, height);
+    for (const s of stars) {
+      const twinkle = t ? 0.5 + 0.5 * Math.sin(t * s.speed + s.phase) : 0.75;
+      const x = t ? (s.x + t * s.drift) % width : s.x;
+      ctx.globalAlpha = s.base * (0.45 + 0.55 * twinkle);
+      ctx.fillStyle = s.r > 1.2 ? '#C9BEFF' : '#EEF0FF';
+      ctx.beginPath();
+      ctx.arc(x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
     }
-    document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
+    ctx.globalAlpha = 1;
+  };
 
-    // ── REVEAL ON SCROLL ──
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  const loop = t => {
+    if (!running) return;
+    draw(t);
+    requestAnimationFrame(loop);
+  };
 
-    // ── SHOWS DATA (from HTML) ──
-    const list = document.getElementById('showsList');
-    const showElements = list.querySelectorAll('.show-row[data-month]');
-    
-    if (showElements.length === 0) {
-      list.innerHTML = '<div class="no-shows">No upcoming shows — check back soon.</div>';
+  const update = () => {
+    const shouldRun = visible && !document.hidden && !reducedMotion.matches;
+    if (shouldRun && !running) {
+      running = true;
+      requestAnimationFrame(loop);
+    } else if (!shouldRun) {
+      running = false;
+      draw(0);
+    }
+  };
+
+  resize();
+  draw(0);
+  update();
+
+  window.addEventListener('resize', () => { resize(); draw(0); });
+  document.addEventListener('visibilitychange', update);
+  reducedMotion.addEventListener('change', update);
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); }).observe(canvas);
+}
+
+// ── HERO PARALLAX ──
+function initHeroParallax() {
+  const ridges = [...document.querySelectorAll('.ridge')];
+  if (!ridges.length) return;
+  const depth = [0.18, 0.1, 0.04]; // far, mid, near
+  let ticking = false;
+
+  const apply = () => {
+    ticking = false;
+    const y = reducedMotion.matches ? 0 : Math.min(window.scrollY, window.innerHeight);
+    ridges.forEach((r, i) => r.style.setProperty('--parallax', `${(y * depth[i]).toFixed(1)}px`));
+  };
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(apply);
+    }
+  }, { passive: true });
+}
+
+// ── SHOWS ──
+// Shows are authored in index.html as .show-row elements with data attributes.
+function renderShows(listEl) {
+  if (!listEl) return;
+  const rows = [...listEl.querySelectorAll('.show-row[data-month]')];
+
+  if (!rows.length) {
+    const empty = document.createElement('p');
+    empty.className = 'shows-empty';
+    empty.append('No shows booked right now. ');
+    const join = document.createElement('a');
+    join.href = '#mailing-list';
+    join.textContent = 'Join the mailing list';
+    empty.append(join, ' to hear first.');
+    listEl.replaceChildren(empty);
+    return;
+  }
+
+  const el = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  };
+
+  rows.forEach(row => {
+    const { month = '', day = '', venue = '', location = '', tickets = '' } = row.dataset;
+
+    const date = el('p', 'show-date');
+    date.append(el('span', 'show-month', month), el('span', 'show-day', day));
+
+    const info = el('div', 'show-info');
+    info.append(el('p', 'show-venue', venue), el('p', 'show-location', location));
+
+    let action;
+    if (/^https?:\/\//.test(tickets)) {
+      action = el('a', 'show-ticket', 'Tickets');
+      action.href = tickets;
+      action.target = '_blank';
+      action.rel = 'noopener noreferrer';
+      action.setAttribute('aria-label', `Tickets for ${venue} (opens in new tab)`);
     } else {
-      showElements.forEach(el => {
-        const show = {
-          month: el.dataset.month,
-          day: el.dataset.day,
-          venue: el.dataset.venue,
-          location: el.dataset.location,
-          tickets: el.dataset.tickets || null
-        };
-        
-        el.innerHTML = `
-          <div class="show-date">
-            <div class="month">${show.month}</div>
-            <div class="day">${show.day}</div>
-          </div>
-          <div class="show-info">
-            <div class="venue">${show.venue}</div>
-            <div class="location">${show.location}</div>
-          </div>
-          ${show.tickets ? `<a href="${show.tickets}" target="_blank" class="show-ticket">Tickets →</a>` : '<span class="show-ticket" style="opacity:0.4;pointer-events:none">More Info TBA</span>'}
-        `;
-        io.observe(el);
-      });
+      action = el('p', 'show-ticket-none', 'Tickets soon');
     }
 
-    // ── PARALLAX HERO ──
-    window.addEventListener('scroll', () => {
-      const y = window.scrollY;
-      document.getElementById('heroBg').style.transform = `scale(1.05) translateY(${y*0.25}px)`;
-    });
+    row.replaceChildren(date, info, action);
+  });
+}
+
+// ── FOOTER YEAR ──
+function initYear() {
+  document.querySelectorAll('[data-year]').forEach(n => { n.textContent = String(new Date().getFullYear()); });
+}
+
+initNav();
+initStarfield(document.querySelector('.starfield'));
+initHeroParallax();
+renderShows(document.getElementById('showsList'));
+initYear();
