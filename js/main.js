@@ -24,7 +24,9 @@ function initNav() {
     }
   });
 
-  const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
+  // Pages without the hero keep a solid header.
+  const hasHero = Boolean(document.querySelector('.hero'));
+  const onScroll = () => header.classList.toggle('scrolled', !hasHero || window.scrollY > 40);
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 

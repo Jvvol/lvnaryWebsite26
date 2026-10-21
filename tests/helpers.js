@@ -1,7 +1,7 @@
 const ORIGIN = 'http://localhost:4317';
 
 // Every page of the site. Extended as pages are added.
-const PAGES = ['/'];
+const PAGES = ['/', '/privacy/', '/cookies/', '/terms/', '/accessibility/', '/do-not-sell/', '/404.html'];
 
 // Collects URLs of requests that leave the local server.
 function externalRequests(page) {

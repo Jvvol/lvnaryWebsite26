@@ -434,6 +434,7 @@ main:focus { outline: none; }
   width: 100%;
   height: clamp(5rem, 14vw, 10rem);
   fill: var(--c-ridge);
+  pointer-events: none;
   transform: scaleX(-1);
 }
 /* Decorative only: the text comes from CSS so it isn't page content. */
