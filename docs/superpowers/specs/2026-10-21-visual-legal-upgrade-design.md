@@ -48,7 +48,7 @@ css/styles.css        components + layout, consumes tokens
 css/legal.css         long-form prose styles for policy pages
 js/main.js            nav, reveal, starfield, shows, signup form
 js/consent.js         consent manager (self-contained, no deps)
-fonts/                self-hosted woff2 + @font-face in tokens.css
+fonts/                self-hosted woff2 (Michroma, IBM Plex Sans) + @font-face in tokens.css
 images/               recompressed/resized; originals replaced
 package.json          devDependencies only (Playwright, axe-core, lighthouse); not used by Pages
 tests/                Playwright specs
@@ -56,19 +56,64 @@ tests/                Playwright specs
 
 Header/footer markup is duplicated across pages (small, static; avoids JS dependency for legal links). Legal pages use root-relative URLs (`/css/...`), valid because the site is served from the domain root.
 
-## 4. Visual design — "Signal from the Ridge"
+## 4. Visual design — "Night over the ridge"
 
-Concept: the Appalachian night sky seen through a spacecraft HUD. Dark, ambient, precise.
+Revised with the frontend-design skill. The first draft leaned on generic "sci-fi HUD" chrome (uppercase mono telemetry labels, coordinate strings, eyebrow labels over every heading, middle-dot meta strings, arrow-suffixed buttons, corner-bracket cards, fade-up on every section). All of that is cut. Boldness is spent in one place: the hero.
 
-- **Hero:** existing band photo, layered SVG Appalachian ridgeline silhouette across the bottom, single `<canvas>` starfield with slow parallax drift (replaces 180 DOM nodes), nebula radial glows. Eyebrow telemetry line: `39.63° N / 79.95° W · MORGANTOWN, WV`.
-- **Motifs:** thin 1px HUD linework, corner brackets on cards, mono "telemetry" labels (e.g. `TRK 01`, `SIG // LIVE`).
-- **Typography (self-hosted, OFL):** Michroma (display/wordmark/headings), IBM Plex Sans (body), IBM Plex Mono (labels). Fluid type scale via `clamp()`.
-- **Color tokens:** deep void background, indigo surfaces, violet/blue accents, lavender highlight. Every text/background pair used for text verified ≥4.5:1 (≥3:1 for large text and UI boundaries).
-- **Tokens:** color, type scale, spacing scale, radii, shadows/glows, motion durations/easings, z-index layers — all in `css/tokens.css`.
-- **Interaction states:** hover, `:focus-visible` glow ring, active (pressed), disabled; signup form idle/loading/success/error; shows empty state ("No transmissions scheduled — check back soon").
-- **Motion:** reveal-on-scroll, starfield drift, subtle hero zoom. All disabled under `prefers-reduced-motion: reduce`. Custom cursor removed entirely; native cursor always.
-- **Responsive:** verified at 375, 768, 1280px. Shows rows keep ticket link visible on mobile (stacked), not hidden.
-- **Performance:** images resized to ≤ 1600px wide (hero) / ≤ 600px (member photos), JPEG q≈78 plus WebP where useful; `loading="lazy"` below the fold; explicit width/height to prevent layout shift.
+**The one memorable thing:** the band photo dissolves downward into three layered Appalachian ridgelines (inline SVG, each a deeper indigo), under a canvas starfield. On load, one orchestrated sequence (~1.6s): stars fade in, ridges rise in staggered parallax, the wordmark letter-spacing settles from wide to final. Scrolling gives the ridges gentle depth parallax. Nothing else on the page animates on its own.
+
+**Color (tokens)**
+| Name | Hex | Role |
+|---|---|---|
+| Void indigo | `#0A0920` | page background (a real night-sky indigo, not tinted black) |
+| Ridge navy | `#151338` | surfaces, nearest ridge |
+| Signal violet | `#6A4BE0` | primary buttons (white text 5.7:1) |
+| Cold signal blue | `#5FA8FF` | links, focus ring (7.9:1 on void) |
+| Lavender haze | `#C9BEFF` | secondary emphasis |
+| Starlight | `#EEF0FF` | body text |
+| Dusk text | `#A6A3CC` | muted text (≈8:1 on void) |
+
+**Type:** two families, clearly distinct, self-hosted.
+- **Michroma** — wordmark and section headings only, sentence case (no forced uppercase); wordmark gets generous tracking as the brand mark.
+- **IBM Plex Sans** (400/500/600) — everything else, including dates (tabular figures). No monospace face.
+- Scale: modular ratio 1.25 from 1.0625rem body; line-height 1.6 body, 1.1 headings; prose measure ≤ 68ch.
+
+**Layout:** left-aligned content on a single 72rem column with a 16px+ gutter; only the hero wordmark is centered (it is a logo lockup).
+
+```
+┌──────────────────────────────────────────┐
+│ LVNARY            Music Shows Merch About│  sticky, transparent → solid on scroll
+│                                          │
+│          [band photo, darkened]          │
+│               L V N A R Y                │  wordmark, centered
+│    Progressive post-hardcore from        │
+│    Morgantown, West Virginia             │
+│      [Listen]  [See shows]               │
+│ /\/\__/\___/\/\____/\/\__ (ridge 3)      │
+│ __/\/\____/\__/\/\_______ (ridge 2)      │
+│ ____/\________/\__________ (ridge 1)     │
+├──────────────────────────────────────────┤
+│ Music                                    │  heading, no eyebrow
+│ Temporary — single, 2024                 │
+│ [Spotify] [Apple Music] [YT Music] [Amz] │
+├─ ridge contour divider ──────────────────┤
+│ Shows  (chronological list, date-led)    │
+│ Merch  · About + members · Mailing list  │
+│ Footer: legal links, cookie settings, ©  │
+└──────────────────────────────────────────┘
+```
+
+**Structure as information:** section dividers are a thin single ridge contour (reuses the hero motif; separates sections). Shows are date-led rows because they are a chronological sequence. "For fans of" stays as a plain sentence-case list, not pill tags.
+
+**Copy rules:** sentence case everywhere; buttons say what happens ("Listen on Spotify", "Shop merch", "Subscribe", "Save choices"); no arrows appended; pronunciation becomes "Pronounced loo-nuh-ree."; empty shows state: "No shows booked right now. Join the mailing list to hear first."; errors say what's wrong and how to fix it.
+
+**Interaction states:** hover (color/underline shift, no lift-on-every-card), `:focus-visible` 2px cold-blue ring with offset, active (slight inset), disabled; signup idle/loading/success/error.
+
+**Motion:** only the hero sequence + ridge parallax + slow star twinkle. Per-section scroll reveals removed. Everything off under `prefers-reduced-motion: reduce`. Custom cursor removed.
+
+**Responsive:** verified at 375, 768, 1280px. Shows rows keep the ticket link visible on mobile (stacked). Member grid 1 → 3 columns.
+
+**Performance:** hero ≤ 1600px wide, member photos ≤ 600px, about photo ≤ 1400px; JPEG q≈78; `loading="lazy"` below the fold; explicit width/height.
 
 ## 5. Accessibility (WCAG 2.1 AA)
 
