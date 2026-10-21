@@ -1,0 +1,62 @@
+{
+  "_help": [
+    "This file is the merch store. Edit it on GitHub, then click 'Commit changes'. The site updates in about a minute.",
+    "take_home_price: what the band keeps per item, in US dollars. The site adds the card fee and rounds up (see settings.json).",
+    "status: 'active' (for sale), 'sold_out' (shown greyed out), or 'hidden' (not shown at all).",
+    "stock: how many are left in each size. 0 greys that size out. Online card orders lower these numbers automatically.",
+    "extra: optional extra take-home dollars for one size, for example 2 for a 2XL that costs more to make.",
+    "ships_as: 'letter' for stickers (cheap letter mail if the whole order is letters) or 'parcel' for shirts.",
+    "id: a short name with no spaces. Never change an id once something has sold; add a new product instead.",
+    "Keep the punctuation exactly as it is: quotes around words, commas between items, no comma after the last item in a list."
+  ],
+  "products": [
+    {
+      "id": "death-metal-tee",
+      "name": "Death Metal T-Shirt (Limited Edition)",
+      "description": "Comfy black t-shirt with a death metal rendition of our logo. Comes with a free sticker.",
+      "take_home_price": 20,
+      "status": "active",
+      "ships_as": "parcel",
+      "photos": [
+        { "src": "/images/merch/death-metal-tee.jpg", "width": 900, "height": 1200, "alt": "Black t-shirt with the LVNARY logo in jagged white death metal lettering over a purple star and circle" }
+      ],
+      "variants": [
+        { "size": "S", "stock": 0 },
+        { "size": "M", "stock": 3 },
+        { "size": "L", "stock": 5 },
+        { "size": "XL", "stock": 2 },
+        { "size": "2XL", "stock": 1, "extra": 2 },
+        { "size": "3XL", "stock": 0, "extra": 0 },
+        { "size": "4XL", "stock": 0, "extra": 0 }
+      ]
+    },
+    {
+      "id": "death-metal-sticker",
+      "name": "Death Metal Sticker (Limited Edition)",
+      "description": "3 inch round sticker with the death metal rendition of our logo.",
+      "take_home_price": 3,
+      "status": "active",
+      "ships_as": "letter",
+      "photos": [
+        { "src": "/images/merch/death-metal-sticker.jpg", "width": 900, "height": 900, "alt": "Round black sticker with the LVNARY logo in jagged white death metal lettering over a purple star" }
+      ],
+      "variants": [
+        { "size": "One size", "stock": 20 }
+      ]
+    },
+    {
+      "id": "logo-sticker",
+      "name": "Logo Sticker",
+      "description": "3 inch round sticker with our classic logo.",
+      "take_home_price": 2,
+      "status": "active",
+      "ships_as": "letter",
+      "photos": [
+        { "src": "/images/merch/logo-sticker.jpg", "width": 900, "height": 900, "alt": "Round deep purple sticker with LVNARY in clean white capitals over a faint star outline" }
+      ],
+      "variants": [
+        { "size": "One size", "stock": 20 }
+      ]
+    }
+  ]
+}

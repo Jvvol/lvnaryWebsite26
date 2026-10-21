@@ -1,0 +1,17 @@
+# Checks the merch store files after every edit. A red X on the commit means
+# something needs fixing; click it to see what, in plain words.
+name: Check merch files
+on:
+  push:
+    paths: ['merch/**', 'js/store-core.js']
+  pull_request:
+    paths: ['merch/**', 'js/store-core.js']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --no-warnings scripts/check-merch.mjs

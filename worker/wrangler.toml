@@ -1,0 +1,31 @@
+# Cloudflare Worker for the LVNARY merch store. Deploy with: npm run worker:deploy
+# Secrets are NOT in this file. Set them once with:
+#   npx wrangler secret put STRIPE_SECRET_KEY --config worker/wrangler.toml
+#   npx wrangler secret put STRIPE_WEBHOOK_SECRET --config worker/wrangler.toml
+#   npx wrangler secret put GITHUB_TOKEN --config worker/wrangler.toml
+name = "lvnary-store"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+# Gives the worker a tidy address. Delete this line to use only the free workers.dev address.
+routes = [{ pattern = "shop-api.lvnary.com", custom_domain = true }]
+
+[vars]
+SITE_ORIGIN = "https://lvnary.com"
+ALLOWED_ORIGINS = "https://lvnary.com,https://www.lvnary.com"
+GITHUB_REPO = "Jvvol/lvnaryWebsite26"
+GITHUB_BRANCH = "main"
+# Must be an address on lvnary.com (Cloudflare Email Routing must be on).
+ORDER_EMAIL_FROM = "orders@lvnary.com"
+# [TODO: band email] Must be a verified destination in Cloudflare Email Routing.
+ORDER_EMAIL_TO = "TODO-band-email@example.com"
+
+[[kv_namespaces]]
+binding = "STORE_KV"
+# [TODO: KV id] Paste the id printed by: npx wrangler kv namespace create STORE_KV --config worker/wrangler.toml
+id = "TODO-kv-namespace-id"
+
+[[send_email]]
+name = "ORDER_EMAIL"
+# [TODO: band email] Same as ORDER_EMAIL_TO above.
+destination_address = "TODO-band-email@example.com"

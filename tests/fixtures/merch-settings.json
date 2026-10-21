@@ -1,0 +1,67 @@
+{
+  "_help": [
+    "Store settings. Edit on GitHub and commit; the site updates in about a minute. All money is US dollars.",
+    "card_fee: Stripe's fee. Prices are raised by this much so the band keeps take_home_price after fees. Check stripe.com/pricing now and then.",
+    "international_card_percent: Stripe's extra fee for cards from outside the US. Added to Canada and worldwide orders.",
+    "round_prices_up_to: listed prices round up to this step (0.5 means $20.60 shows as $21.00). Use 0.01 for no rounding.",
+    "shipping: what you pay for postage, per zone. 'letter' is used when the whole order is stickers; otherwise 'parcel'. first = first item, each_additional = every item after that.",
+    "free_shipping: set enabled to true to ship free when the items add up to minimum_order or more, in the listed zones.",
+    "pay_apps: your handles. Leave one empty (\"\") to hide it. If all are empty, the Venmo / Cash App / Zelle option is hidden.",
+    "checkout_api: the address of the checkout worker. Leave empty to show the store with checkout turned off."
+  ],
+  "card_fee": {
+    "percent": 2.9,
+    "fixed": 0.3
+  },
+  "international_card_percent": 1.5,
+  "round_prices_up_to": 0.5,
+  "max_per_item": 10,
+  "shipping": {
+    "US": {
+      "label": "United States",
+      "letter": {
+        "first": 1.5,
+        "each_additional": 0.25
+      },
+      "parcel": {
+        "first": 5.5,
+        "each_additional": 1.5
+      }
+    },
+    "CA": {
+      "label": "Canada",
+      "letter": {
+        "first": 2.5,
+        "each_additional": 0.25
+      },
+      "parcel": {
+        "first": 17,
+        "each_additional": 3
+      }
+    },
+    "WORLD": {
+      "label": "Everywhere else",
+      "letter": {
+        "first": 3,
+        "each_additional": 0.25
+      },
+      "parcel": {
+        "first": 22,
+        "each_additional": 4
+      }
+    }
+  },
+  "free_shipping": {
+    "enabled": false,
+    "minimum_order": 75,
+    "zones": [
+      "US"
+    ]
+  },
+  "pay_apps": {
+    "venmo": "@lvnary-test",
+    "cash_app": "$lvnarytest",
+    "zelle": ""
+  },
+  "checkout_api": "https://shop-api.example.test"
+}

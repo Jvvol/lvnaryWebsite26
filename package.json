@@ -4,13 +4,18 @@
   "description": "Static site for lvnary.com. Dev dependencies are for local testing only; GitHub Pages serves the files as-is.",
   "scripts": {
     "serve": "http-server . -p 4317 -c-1 -s",
-    "test": "playwright test"
+    "test": "npm run test:unit && playwright test",
+    "test:unit": "node --no-warnings --test \"worker/test/*.test.mjs\"",
+    "check:merch": "node --no-warnings scripts/check-merch.mjs",
+    "worker:dev": "wrangler dev --config worker/wrangler.toml",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.64.1",
     "http-server": "^14.1.1",
     "lighthouse": "^13.5.0",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "wrangler": "^4.151.3"
   }
 }

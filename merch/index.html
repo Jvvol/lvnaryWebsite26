@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merch | LVNARY</title>
+    <meta name="description" content="LVNARY shirts and stickers, shipped from Morgantown, West Virginia to the US, Canada, and worldwide.">
+    <meta name="theme-color" content="#0A0920">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <script>document.documentElement.classList.add('js');</script>
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/merch.css">
+    <script type="module" src="/js/merch.js"></script>
+    <script src="/js/consent.js" defer></script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header scrolled" id="siteHeader">
+      <a href="/" class="brand">LVNARY</a>
+
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+      </button>
+
+      <nav aria-label="Primary">
+        <ul class="nav-links" id="nav-links">
+          <li><a href="/#music">Music</a></li>
+          <li><a href="/#shows">Shows</a></li>
+          <li><a href="/merch/" aria-current="page">Merch</a></li>
+          <li><a href="/#about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1" class="shop">
+      <div class="shop-head">
+        <h1 class="shop-title">Merch</h1>
+        <p class="shop-intro">Shirts and stickers, packed by the band in Morgantown and shipped anywhere.</p>
+      </div>
+
+      <noscript><p class="shop-notice">The store needs JavaScript to run. To order without it, message us on <a href="https://www.instagram.com/wearelvnary/">Instagram</a>.</p></noscript>
+      <p class="shop-notice" id="shopNotice" hidden></p>
+
+      <div class="shop-layout">
+        <div class="products" id="products" aria-busy="true"></div>
+
+        <section class="bag" id="bag" aria-labelledby="bag-title" tabindex="-1" hidden>
+          <h2 class="bag-title" id="bag-title">Your bag</h2>
+          <p class="bag-empty" id="bagEmpty">Your bag is empty. Pick a size and add something.</p>
+          <ul class="bag-lines" id="bagLines"></ul>
+
+          <div class="bag-checkout" id="bagCheckout" hidden>
+            <div class="field">
+              <label for="ship-zone">Ship to</label>
+              <select id="ship-zone" name="zone" aria-describedby="ship-zone-error">
+                <option value="">Choose a country or region</option>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="WORLD">Everywhere else</option>
+              </select>
+              <p class="field-error" id="ship-zone-error" hidden></p>
+            </div>
+
+            <dl class="totals">
+              <div><dt>Items</dt><dd id="itemsTotal">$0.00</dd></div>
+              <div><dt>Shipping</dt><dd id="shippingTotal">Choose where to ship</dd></div>
+              <div class="totals-grand"><dt>Total</dt><dd id="grandTotal">$0.00</dd></div>
+            </dl>
+            <p class="bag-fine">Prices include card processing. US dollars.</p>
+
+            <div class="pay">
+              <button type="button" class="btn btn-primary" id="payCard">Pay by card</button>
+              <p class="pay-note">Card, Apple Pay, or Google Pay on Stripe's secure checkout page.</p>
+              <button type="button" class="btn btn-ghost" id="payApp" aria-expanded="false" aria-controls="appOrder" hidden></button>
+            </div>
+            <p class="bag-status" id="bagStatus" role="status" aria-live="polite"></p>
+
+            <form class="app-order" id="appOrder" novalidate hidden>
+              <h3 class="app-order-title">Your details</h3>
+              <p class="app-order-intro">We'll give you an order number to put in your payment note, then ship when the payment arrives.</p>
+
+              <fieldset class="field field-choice" id="app-field">
+                <legend>Paying with</legend>
+                <div class="choices" id="appChoices"></div>
+                <p class="field-error" id="app-error" hidden></p>
+              </fieldset>
+
+              <div class="field">
+                <label for="order-name">Full name</label>
+                <input id="order-name" name="name" autocomplete="name" required>
+                <p class="field-error" id="order-name-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="order-email">Email address</label>
+                <input id="order-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+                <p class="field-error" id="order-email-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="order-line1">Street address</label>
+                <input id="order-line1" name="line1" autocomplete="address-line1" required>
+                <p class="field-error" id="order-line1-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="order-line2">Apartment, suite, etc. <span class="optional">(optional)</span></label>
+                <input id="order-line2" name="line2" autocomplete="address-line2">
+                <p class="field-error" id="order-line2-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="order-city">City or town</label>
+                <input id="order-city" name="city" autocomplete="address-level2" required>
+                <p class="field-error" id="order-city-error" hidden></p>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="order-state" id="order-state-label">State</label>
+                  <input id="order-state" name="state" autocomplete="address-level1">
+                  <p class="field-error" id="order-state-error" hidden></p>
+                </div>
+                <div class="field">
+                  <label for="order-postal_code" id="order-postal-label">ZIP code</label>
+                  <input id="order-postal_code" name="postal_code" autocomplete="postal-code">
+                  <p class="field-error" id="order-postal_code-error" hidden></p>
+                </div>
+              </div>
+              <div class="field" id="country-field" hidden>
+                <label for="order-country">Country</label>
+                <input id="order-country" name="country" autocomplete="country-name">
+                <p class="field-error" id="order-country-error" hidden></p>
+              </div>
+              <div class="field-trap" aria-hidden="true">
+                <label for="order-website">Leave this empty</label>
+                <input id="order-website" name="website" tabindex="-1" autocomplete="off">
+              </div>
+
+              <button type="submit" class="btn btn-primary">Place order</button>
+            </form>
+          </div>
+
+          <div class="placed" id="placed" tabindex="-1" hidden></div>
+        </section>
+      </div>
+
+      <a class="bag-bar" id="bagBar" href="#bag" hidden></a>
+    </main>
+
+    <footer class="site-footer">
+      <svg class="footer-ridge" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false"><path d="M-48,221.1 C16,219.1 32,216.7 48,212.8 C64,208.8 80,201.1 96,196.8 C112,192.5 128,187.6 144,187.0 C160,186.3 176,189.6 192,192.8 C208,196.0 224,202.3 240,206.0 C256,209.6 272,212.0 288,214.8 C304,217.5 320,218.5 336,222.4 C352,226.2 368,232.2 384,238.0 C400,243.9 416,252.9 432,257.6 C448,262.4 464,265.9 480,266.4 C496,266.9 512,262.9 528,260.8 C544,258.7 560,254.9 576,253.9 C592,252.9 608,254.4 624,254.9 C640,255.3 656,257.3 672,256.6 C688,256.0 704,253.0 720,251.1 C736,249.3 752,245.4 768,245.4 C784,245.4 800,248.0 816,251.1 C832,254.2 848,261.1 864,264.2 C880,267.2 896,269.6 912,269.2 C928,268.8 944,264.4 960,261.6 C976,258.8 992,254.6 1008,252.2 C1024,249.8 1040,249.6 1056,247.3 C1072,245.0 1088,243.2 1104,238.5 C1120,233.8 1136,225.6 1152,218.9 C1168,212.3 1184,203.1 1200,198.6 C1216,194.1 1232,192.1 1248,192.0 C1264,191.8 1280,195.8 1296,197.5 C1312,199.2 1328,201.3 1344,202.1 C1360,203.0 1376,201.5 1392,202.6 C1408,203.7 1424,205.3 1440,208.8 L1488,320 L-48,320 Z"/></svg>
+      <div class="footer-inner">
+
+        <nav aria-label="Legal" class="footer-nav">
+          <ul>
+            <li><a href="/privacy/">Privacy</a></li>
+            <li><a href="/cookies/">Cookies</a></li>
+            <li><a href="/terms/">Terms</a></li>
+            <li><a href="/accessibility/">Accessibility</a></li>
+            <li><a href="/do-not-sell/">Do Not Sell or Share My Personal Information</a></li>
+            <li><button type="button" class="link-button" data-open-consent>Cookie settings</button></li>
+          </ul>
+        </nav>
+
+        <p class="footer-copy">© <span data-year>2026</span> LVNARY. Morgantown, West Virginia.</p>
+      </div>
+      <div class="footer-wordmark" aria-hidden="true"></div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+  </body>
+</html>
