@@ -1,0 +1,100 @@
+/* ── FONTS (self-hosted, SIL OFL — see /fonts/OFL.txt) ── */
+@font-face {
+  font-family: 'Michroma';
+  src: url('../fonts/michroma-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('../fonts/plex-sans-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('../fonts/plex-sans-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('../fonts/plex-sans-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── DESIGN TOKENS ── */
+:root {
+  color-scheme: dark;
+
+  /* Color: night over the ridge */
+  --c-void:      #0A0920;   /* page background */
+  --c-ridge:     #151338;   /* surfaces, nearest ridge */
+  --c-ridge-mid: #1D1A4A;   /* middle ridge */
+  --c-ridge-far: #28235E;   /* farthest ridge */
+  --c-violet:    #6A4BE0;   /* primary buttons */
+  --c-violet-hi: #7D61EC;   /* primary hover */
+  --c-blue:      #5FA8FF;   /* links, focus */
+  --c-lavender:  #C9BEFF;   /* secondary emphasis */
+  --c-text:      #EEF0FF;   /* body text */
+  --c-muted:     #A6A3CC;   /* muted text */
+  --c-danger:    #FF9BB0;   /* error text */
+  --c-success:   #8FE3C0;   /* success text */
+  --c-border:    rgba(201, 190, 255, 0.18);
+  --c-border-hi: rgba(201, 190, 255, 0.42);
+  --c-scrim:     rgba(10, 9, 32, 0.86);
+
+  /* Type */
+  --font-display: 'Michroma', 'Eurostile', 'Arial', sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Modular scale, ratio 1.25 from 1.0625rem */
+  --step--1: 0.85rem;
+  --step-0:  1.0625rem;
+  --step-1:  1.328rem;
+  --step-2:  1.66rem;
+  --step-3:  clamp(1.66rem, 1.3rem + 1.6vw, 2.075rem);
+  --step-4:  clamp(2.075rem, 1.5rem + 2.4vw, 2.594rem);
+  --step-5:  clamp(2.3rem, 1.6rem + 3.2vw, 3.24rem);
+  --step-hero: clamp(2.4rem, 11vw, 8rem);
+
+  --leading-body: 1.6;
+  --leading-tight: 1.1;
+  --measure: 68ch;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 5rem;
+
+  --gutter: max(1rem, 5vw);
+  --content-max: 72rem;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 10px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-med: 300ms;
+  --dur-slow: 1600ms;
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+
+  /* Layers */
+  --z-nav: 100;
+  --z-banner: 200;
+  --z-dialog: 300;
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--c-void), 0 0 0 4px var(--c-blue);
+}

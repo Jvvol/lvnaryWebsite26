@@ -130,7 +130,7 @@
     }
     .hero-bg {
       position: absolute; inset: 0;
-      background-image: url("images/band/hero-band.jpg");
+      background-image: url("../images/band/hero-band.jpg");
       background-size: cover; background-position: center 30%;
       filter: brightness(0.35) saturate(1.2);
       transform: scale(1.05);
