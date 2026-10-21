@@ -257,7 +257,7 @@ main:focus { outline: none; }
   padding: var(--space-8) var(--gutter);
 }
 
-/* Liner-notes rail: the section title sits beside its content on wide screens. */
+/* Section titles sit above their content so the content gets the full width. */
 .section-title {
   font-family: var(--font-display);
   font-weight: 400;
@@ -567,8 +567,10 @@ html:not(.js) [data-open-consent] { display: none; }
 
 /* ── WIDER SCREENS ── */
 @media (min-width: 56rem) {
-  .rail { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--space-7); }
-  .rail > .section-title { position: sticky; top: 6rem; align-self: start; font-size: var(--step-3); }
+  /* Mailing list: the pitch on the left, the form beside it. */
+  .section-signup .section-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 32rem); column-gap: var(--space-8); align-items: start; }
+  .section-signup .lede { grid-column: 1; }
+  .section-signup .signup { grid-column: 2; grid-row: 1 / span 2; }
   .about-grid { grid-template-columns: 1.15fr 1fr; gap: var(--space-7); }
   .footer-inner { grid-template-columns: auto 1fr; align-items: center; }
   .footer-nav ul { justify-content: flex-end; }
@@ -632,6 +634,36 @@ html:not(.js) [data-open-consent] { display: none; }
   .show-ticket-none { grid-column: 2; justify-self: start; }
 
   .hero-content { padding-bottom: 9rem; }
+
+  .section-title { font-size: var(--step-3); margin-bottom: var(--space-5); }
+  .release-title { font-size: var(--step-4); }
+  .lede { font-size: var(--step-0); }
+
+  /* Streaming links: an even two-up grid of full-width tap targets. */
+  .platform-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .platform-link { justify-content: center; width: 100%; padding-inline: var(--space-3); text-align: center; }
+
+  /* Members as a compact list: portrait beside name, role, and socials. */
+  .members { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .member {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    column-gap: var(--space-5);
+    align-items: center;
+  }
+  .member > img { grid-row: 1 / span 3; width: 100%; outline-offset: 5px; }
+  .member:hover > img,
+  .member:focus-within > img { outline-offset: 8px; }
+  .member-name { margin-top: 0; }
+
+  .about-photo { border-radius: var(--radius-sm); }
+}
+
+/* Phones: main actions span the width so they're easy to hit with a thumb. */
+@media (max-width: 30rem) {
+  .hero-actions { flex-direction: column; align-items: stretch; width: min(100%, 20rem); margin-inline: auto; }
+  #merch .btn-primary,
+  .signup-submit .btn { width: 100%; }
 }
 
 /* ── REDUCED MOTION ── */
