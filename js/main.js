@@ -168,7 +168,7 @@ function renderShows(listEl) {
 
     let action;
     if (/^https?:\/\//.test(tickets)) {
-      action = el('a', 'show-ticket', 'Tickets');
+      action = el('a', 'show-ticket btn btn-ghost', 'Tickets');
       action.href = tickets;
       action.target = '_blank';
       action.rel = 'noopener noreferrer';

@@ -257,6 +257,7 @@ main:focus { outline: none; }
   padding: var(--space-8) var(--gutter);
 }
 
+/* Liner-notes rail: the section title sits beside its content on wide screens. */
 .section-title {
   font-family: var(--font-display);
   font-weight: 400;
@@ -265,6 +266,7 @@ main:focus { outline: none; }
   letter-spacing: 0.04em;
   margin-bottom: var(--space-6);
 }
+.section-body > :first-child { margin-top: 0; }
 
 .subhead {
   font-family: var(--font-display);
@@ -281,20 +283,12 @@ main:focus { outline: none; }
   margin-bottom: var(--space-6);
 }
 
-.divider {
-  width: 100%;
-  height: 3rem;
-  fill: none;
-  stroke: var(--c-border-hi);
-  stroke-width: 1.25;
-  vector-effect: non-scaling-stroke;
-}
 
 /* ── MUSIC ── */
 .release-title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: var(--step-3);
+  font-size: var(--step-5);
   line-height: var(--leading-tight);
   letter-spacing: 0.04em;
   color: var(--c-lavender);
@@ -318,24 +312,23 @@ main:focus { outline: none; }
 .platform-link:hover { border-color: var(--c-blue); background: rgba(95, 168, 255, 0.08); color: var(--c-text); }
 
 /* ── SHOWS ── */
-.shows-list { display: grid; gap: var(--space-3); }
+/* Tour dates: rows on the night sky, separated by thin lines. */
+.shows-list { display: grid; }
 
 .show-row {
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-5);
-  padding: var(--space-5);
-  background: var(--c-ridge);
-  border: 1px solid var(--c-border);
-  border-radius: var(--radius-md);
-  transition: border-color var(--dur-fast) var(--ease-out);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--c-border);
 }
-.show-row:hover { border-color: var(--c-border-hi); }
+.show-row:last-child { border-bottom: 1px solid var(--c-border); }
 
-.show-date { text-align: center; line-height: 1; }
-.show-month { display: block; font-size: var(--step--1); font-weight: 600; letter-spacing: 0.08em; color: var(--c-lavender); }
-.show-day { display: block; margin-top: var(--space-1); font-size: var(--step-3); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Day sits above month, poster-style; DOM order stays "month day" for screen readers. */
+.show-date { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: var(--space-1); line-height: 1; }
+.show-day { font-family: var(--font-display); font-size: var(--step-4); font-variant-numeric: tabular-nums; }
+.show-month { font-size: var(--step--1); font-weight: 600; letter-spacing: 0.08em; color: var(--c-lavender); }
 
 .show-venue { font-size: var(--step-1); font-weight: 600; overflow-wrap: anywhere; }
 .show-location { color: var(--c-muted); }
@@ -363,13 +356,19 @@ main:focus { outline: none; }
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: var(--space-6);
 }
+/* Three moons: circular portraits with an orbit ring that answers hover and focus. */
 .member > img {
-  width: 100%;
+  width: min(100%, 15rem);
   height: auto;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: var(--radius-md);
+  border-radius: 50%;
+  outline: 1px solid var(--c-border);
+  outline-offset: 8px;
+  transition: outline-color var(--dur-med) var(--ease-out), outline-offset var(--dur-med) var(--ease-out);
 }
+.member:hover > img,
+.member:focus-within > img { outline-color: var(--c-blue); outline-offset: 12px; }
 .member-name { margin-top: var(--space-4); font-size: var(--step-1); font-weight: 600; }
 .member-role { color: var(--c-muted); }
 
@@ -394,7 +393,6 @@ main:focus { outline: none; }
 .socials-band img { width: 28px; height: 28px; }
 
 /* ── SIGNUP SECTION ── */
-.section-signup { background: var(--c-ridge); }
 
 .signup { display: grid; gap: var(--space-5); max-width: 36rem; }
 .field { display: grid; gap: var(--space-2); }
@@ -426,7 +424,34 @@ main:focus { outline: none; }
 .signup-status[data-tone="error"] { color: var(--c-danger); }
 
 /* ── FOOTER ── */
-.site-footer { background: var(--c-ridge); border-top: 1px solid var(--c-border); }
+/* Footer bookends the hero: the ridge rises again and the wordmark closes the page. */
+.site-footer { position: relative; background: var(--c-ridge); margin-top: clamp(5rem, 14vw, 10rem); }
+.footer-ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  width: 100%;
+  height: clamp(5rem, 14vw, 10rem);
+  fill: var(--c-ridge);
+  transform: scaleX(-1);
+}
+/* Decorative only: the text comes from CSS so it isn't page content. */
+.footer-wordmark::before { content: 'LVNARY'; }
+.footer-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 11.5vw, 11rem);
+  line-height: 0.8;
+  padding-left: 0.06em;
+  margin-bottom: -0.1em;
+  letter-spacing: 0.06em;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--c-ridge-mid);
+  user-select: none;
+  padding-bottom: var(--space-4);
+  overflow: hidden;
+}
 .footer-inner {
   display: grid;
   gap: var(--space-5);
@@ -536,6 +561,8 @@ main:focus { outline: none; }
 
 /* ── WIDER SCREENS ── */
 @media (min-width: 56rem) {
+  .rail { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--space-7); }
+  .rail > .section-title { position: sticky; top: 6rem; align-self: start; font-size: var(--step-3); }
   .about-grid { grid-template-columns: 1.15fr 1fr; gap: var(--space-7); }
   .footer-inner { grid-template-columns: auto 1fr; align-items: center; }
   .footer-nav ul { justify-content: flex-end; }
@@ -590,10 +617,11 @@ main:focus { outline: none; }
   .section-inner { padding-block: var(--space-7); }
 
   .show-row {
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: 3.75rem minmax(0, 1fr);
     gap: var(--space-2) var(--space-4);
-    padding: var(--space-4);
+    padding: var(--space-4) 0;
   }
+  .show-day { font-size: var(--step-3); }
   .show-ticket,
   .show-ticket-none { grid-column: 2; justify-self: start; }
 

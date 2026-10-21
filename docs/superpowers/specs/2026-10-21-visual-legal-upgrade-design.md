@@ -103,6 +103,8 @@ Revised with the frontend-design skill. The first draft leaned on generic "sci-f
 └──────────────────────────────────────────┘
 ```
 
+**Rework (2026-10-21, at the user's request, frontend-design):** below the hero the page reads like liner notes. Section titles sit in a sticky left rail on wide screens (stacked on mobile); shows are a tour-date list (large day number over month, rows separated by thin lines, no cards); member portraits are circles ("three moons") with an orbit ring that answers hover/focus; repeated wavy dividers are removed. The ridge returns once at the top of the footer, which closes with a large decorative wordmark, so the page begins and ends at the ridge.
+
 **Structure as information:** section dividers are a thin single ridge contour (reuses the hero motif; separates sections). Shows are date-led rows because they are a chronological sequence. "For fans of" stays as a plain sentence-case list, not pill tags.
 
 **Copy rules:** sentence case everywhere; buttons say what happens ("Listen on Spotify", "Shop merch", "Subscribe", "Save choices"); no arrows appended; pronunciation becomes "Pronounced loo-nuh-ree."; empty shows state: "No shows booked right now. Join the mailing list to hear first."; errors say what's wrong and how to fix it.
