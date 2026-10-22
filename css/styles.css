@@ -449,13 +449,12 @@ html:not(.js) [data-open-consent] { display: none; }
   font-size: clamp(2.5rem, 11.5vw, 11rem);
   line-height: 0.8;
   padding-left: 0.06em;
-  margin-bottom: -0.1em;
   letter-spacing: 0.06em;
   text-align: center;
   white-space: nowrap;
   color: var(--c-ridge-mid);
   user-select: none;
-  padding-bottom: var(--space-4);
+  padding-bottom: clamp(var(--space-5), 4vw, var(--space-7));
   overflow: hidden;
 }
 .footer-inner {

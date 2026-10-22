@@ -48,6 +48,11 @@ function listAnd(words) {
 }
 
 // ── PRODUCTS ──
+// Big titles shouldn't break "T-Shirt" into "T-" and "Shirt", so hyphenated words stay whole.
+function nameWithoutHyphenBreaks(name) {
+  return name.split(/(\S*-\S*)/).filter(Boolean).map(part => part.includes('-') && !/\s/.test(part) ? el('span', { class: 'nowrap', text: part }) : part);
+}
+
 function renderProduct(product, index) {
   const soldOut = product.status === 'sold_out' || product.variants.every(v => !isAvailable(product, v));
   const prices = product.variants.map(v => listedUnitCents(product, v, settings));
@@ -117,7 +122,7 @@ function renderProduct(product, index) {
   return el('article', { class: `product${soldOut ? ' is-sold-out' : ''}`, 'aria-labelledby': nameId },
     el('img', { class: 'product-photo', src: photo.src, width: photo.width, height: photo.height, alt: photo.alt, loading: index === 0 ? 'eager' : 'lazy', decoding: 'async' }),
     el('div', { class: 'product-info' },
-      el('h2', { class: 'product-name', id: nameId, text: product.name }),
+      el('h2', { class: 'product-name', id: nameId }, nameWithoutHyphenBreaks(product.name)),
       el('p', { class: 'product-price', text: soldOut ? `${priceText}, sold out` : priceText }),
       product.description ? el('p', { class: 'product-desc', text: product.description }) : null,
       soldOut ? el('p', { class: 'product-soldout', text: 'Sold out for now. Follow us on Instagram to hear when it’s back.' }) : form,
@@ -139,6 +144,11 @@ function renderBag() {
   const empty = bag.items.length === 0;
   $('bagEmpty').hidden = !empty;
   $('bagCheckout').hidden = empty;
+  if (empty) {
+    // The order form sits outside the checkout block, so close it with the bag.
+    $('appOrder').hidden = true;
+    $('payApp').setAttribute('aria-expanded', 'false');
+  }
   lines.replaceChildren();
 
   const q = currentQuote();
@@ -186,6 +196,13 @@ function renderBag() {
   }
   updateBagBar();
   updateZoneFields();
+}
+
+// The bag sits below every product, so a bar jumps to it, except while the bag is already on screen.
+function watchBag() {
+  if (!('IntersectionObserver' in window)) return;
+  new IntersectionObserver(([entry]) => $('bagBar').classList.toggle('is-near', entry.isIntersecting), { rootMargin: '0px 0px -25% 0px' })
+    .observe($('bag'));
 }
 
 function updateBagBar() {
@@ -409,6 +426,7 @@ async function init() {
   $('payCard').addEventListener('click', payByCard);
   initAppOrder();
   renderBag();
+  watchBag();
 }
 
 init();

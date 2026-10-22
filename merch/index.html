@@ -53,94 +53,99 @@
         <section class="bag" id="bag" aria-labelledby="bag-title" tabindex="-1" hidden>
           <h2 class="bag-title" id="bag-title">Your bag</h2>
           <p class="bag-empty" id="bagEmpty">Your bag is empty. Pick a size and add something.</p>
-          <ul class="bag-lines" id="bagLines"></ul>
 
-          <div class="bag-checkout" id="bagCheckout" hidden>
-            <div class="field">
-              <label for="ship-zone">Ship to</label>
-              <select id="ship-zone" name="zone" aria-describedby="ship-zone-error">
-                <option value="">Choose a country or region</option>
-                <option value="US">United States</option>
-                <option value="CA">Canada</option>
-                <option value="WORLD">Everywhere else</option>
-              </select>
-              <p class="field-error" id="ship-zone-error" hidden></p>
-            </div>
+          <div class="bag-body">
+            <ul class="bag-lines" id="bagLines"></ul>
 
-            <dl class="totals">
-              <div><dt>Items</dt><dd id="itemsTotal">$0.00</dd></div>
-              <div><dt>Shipping</dt><dd id="shippingTotal">Choose where to ship</dd></div>
-              <div class="totals-grand"><dt>Total</dt><dd id="grandTotal">$0.00</dd></div>
-            </dl>
-            <p class="bag-fine">Prices include card processing. US dollars.</p>
-
-            <div class="pay">
-              <button type="button" class="btn btn-primary" id="payCard">Pay by card</button>
-              <p class="pay-note">Card, Apple Pay, or Google Pay on Stripe's secure checkout page.</p>
-              <button type="button" class="btn btn-ghost" id="payApp" aria-expanded="false" aria-controls="appOrder" hidden></button>
-            </div>
-            <p class="bag-status" id="bagStatus" role="status" aria-live="polite"></p>
-
-            <form class="app-order" id="appOrder" novalidate hidden>
-              <h3 class="app-order-title">Your details</h3>
-              <p class="app-order-intro">We'll give you an order number to put in your payment note, then ship when the payment arrives.</p>
-
-              <fieldset class="field field-choice" id="app-field">
-                <legend>Paying with</legend>
-                <div class="choices" id="appChoices"></div>
-                <p class="field-error" id="app-error" hidden></p>
-              </fieldset>
-
-              <div class="field">
-                <label for="order-name">Full name</label>
-                <input id="order-name" name="name" autocomplete="name" required>
-                <p class="field-error" id="order-name-error" hidden></p>
-              </div>
-              <div class="field">
-                <label for="order-email">Email address</label>
-                <input id="order-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-                <p class="field-error" id="order-email-error" hidden></p>
-              </div>
-              <div class="field">
-                <label for="order-line1">Street address</label>
-                <input id="order-line1" name="line1" autocomplete="address-line1" required>
-                <p class="field-error" id="order-line1-error" hidden></p>
-              </div>
-              <div class="field">
-                <label for="order-line2">Apartment, suite, etc. <span class="optional">(optional)</span></label>
-                <input id="order-line2" name="line2" autocomplete="address-line2">
-                <p class="field-error" id="order-line2-error" hidden></p>
-              </div>
-              <div class="field">
-                <label for="order-city">City or town</label>
-                <input id="order-city" name="city" autocomplete="address-level2" required>
-                <p class="field-error" id="order-city-error" hidden></p>
-              </div>
-              <div class="field-row">
+            <div class="bag-checkout" id="bagCheckout" hidden>
+              <div class="bag-summary">
                 <div class="field">
-                  <label for="order-state" id="order-state-label">State</label>
-                  <input id="order-state" name="state" autocomplete="address-level1">
-                  <p class="field-error" id="order-state-error" hidden></p>
+                  <label for="ship-zone">Ship to</label>
+                  <select id="ship-zone" name="zone" aria-describedby="ship-zone-error">
+                    <option value="">Choose a country or region</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="WORLD">Everywhere else</option>
+                  </select>
+                  <p class="field-error" id="ship-zone-error" hidden></p>
                 </div>
-                <div class="field">
-                  <label for="order-postal_code" id="order-postal-label">ZIP code</label>
-                  <input id="order-postal_code" name="postal_code" autocomplete="postal-code">
-                  <p class="field-error" id="order-postal_code-error" hidden></p>
-                </div>
-              </div>
-              <div class="field" id="country-field" hidden>
-                <label for="order-country">Country</label>
-                <input id="order-country" name="country" autocomplete="country-name">
-                <p class="field-error" id="order-country-error" hidden></p>
-              </div>
-              <div class="field-trap" aria-hidden="true">
-                <label for="order-website">Leave this empty</label>
-                <input id="order-website" name="website" tabindex="-1" autocomplete="off">
+
+                <dl class="totals">
+                  <div><dt>Items</dt><dd id="itemsTotal">$0.00</dd></div>
+                  <div><dt>Shipping</dt><dd id="shippingTotal">Choose where to ship</dd></div>
+                  <div class="totals-grand"><dt>Total</dt><dd id="grandTotal">$0.00</dd></div>
+                </dl>
+                <p class="bag-fine">Prices include card processing. US dollars.</p>
               </div>
 
-              <button type="submit" class="btn btn-primary">Place order</button>
-            </form>
+              <div class="pay">
+                <button type="button" class="btn btn-primary" id="payCard">Pay by card</button>
+                <p class="pay-note">Card, Apple Pay, or Google Pay on Stripe's secure checkout page.</p>
+                <button type="button" class="btn btn-ghost" id="payApp" aria-expanded="false" aria-controls="appOrder" hidden></button>
+                <p class="bag-status" id="bagStatus" role="status" aria-live="polite"></p>
+              </div>
+            </div>
           </div>
+
+          <form class="app-order" id="appOrder" novalidate hidden>
+            <h3 class="app-order-title">Your details</h3>
+            <p class="app-order-intro">We'll give you an order number to put in your payment note, then ship when the payment arrives.</p>
+
+            <fieldset class="field field-choice" id="app-field">
+              <legend>Paying with</legend>
+              <div class="choices" id="appChoices"></div>
+              <p class="field-error" id="app-error" hidden></p>
+            </fieldset>
+
+            <div class="field">
+              <label for="order-name">Full name</label>
+              <input id="order-name" name="name" autocomplete="name" required>
+              <p class="field-error" id="order-name-error" hidden></p>
+            </div>
+            <div class="field">
+              <label for="order-email">Email address</label>
+              <input id="order-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <p class="field-error" id="order-email-error" hidden></p>
+            </div>
+            <div class="field">
+              <label for="order-line1">Street address</label>
+              <input id="order-line1" name="line1" autocomplete="address-line1" required>
+              <p class="field-error" id="order-line1-error" hidden></p>
+            </div>
+            <div class="field">
+              <label for="order-line2">Apartment, suite, etc. <span class="optional">(optional)</span></label>
+              <input id="order-line2" name="line2" autocomplete="address-line2">
+              <p class="field-error" id="order-line2-error" hidden></p>
+            </div>
+            <div class="field">
+              <label for="order-city">City or town</label>
+              <input id="order-city" name="city" autocomplete="address-level2" required>
+              <p class="field-error" id="order-city-error" hidden></p>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="order-state" id="order-state-label">State</label>
+                <input id="order-state" name="state" autocomplete="address-level1">
+                <p class="field-error" id="order-state-error" hidden></p>
+              </div>
+              <div class="field">
+                <label for="order-postal_code" id="order-postal-label">ZIP code</label>
+                <input id="order-postal_code" name="postal_code" autocomplete="postal-code">
+                <p class="field-error" id="order-postal_code-error" hidden></p>
+              </div>
+            </div>
+            <div class="field" id="country-field" hidden>
+              <label for="order-country">Country</label>
+              <input id="order-country" name="country" autocomplete="country-name">
+              <p class="field-error" id="order-country-error" hidden></p>
+            </div>
+            <div class="field-trap" aria-hidden="true">
+              <label for="order-website">Leave this empty</label>
+              <input id="order-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Place order</button>
+          </form>
 
           <div class="placed" id="placed" tabindex="-1" hidden></div>
         </section>
