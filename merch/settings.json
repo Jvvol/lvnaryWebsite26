@@ -36,5 +36,5 @@
     "cash_app": "",
     "zelle": ""
   },
-  "checkout_api": ""
+  "checkout_api": "https://shop-api.lvnary.com"
 }

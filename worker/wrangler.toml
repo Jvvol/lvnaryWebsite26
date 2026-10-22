@@ -17,15 +17,14 @@ GITHUB_REPO = "Jvvol/lvnaryWebsite26"
 GITHUB_BRANCH = "main"
 # Must be an address on lvnary.com (Cloudflare Email Routing must be on).
 ORDER_EMAIL_FROM = "orders@lvnary.com"
-# [TODO: band email] Must be a verified destination in Cloudflare Email Routing.
-ORDER_EMAIL_TO = "TODO-band-email@example.com"
+# Must be a verified destination in Cloudflare Email Routing.
+ORDER_EMAIL_TO = "wearelvnary@gmail.com"
 
 [[kv_namespaces]]
 binding = "STORE_KV"
-# [TODO: KV id] Paste the id printed by: npx wrangler kv namespace create STORE_KV --config worker/wrangler.toml
-id = "TODO-kv-namespace-id"
+id = "b2fb67ca9275441a95b779f45c72fbe0"
 
 [[send_email]]
 name = "ORDER_EMAIL"
-# [TODO: band email] Same as ORDER_EMAIL_TO above.
-destination_address = "TODO-band-email@example.com"
+# Same as ORDER_EMAIL_TO above.
+destination_address = "wearelvnary@gmail.com"
