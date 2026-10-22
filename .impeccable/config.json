@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-22T20:46:09.839Z",
+        "reason": "Claude: brand accent is the purple of the band's own merch print; single accent hue, no cyan pairing"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-22T20:46:10.031Z",
+        "reason": "Claude: verified false positives; section and player content is inset 80px+ by inner wrappers"
+      }
+    ]
+  }
+}

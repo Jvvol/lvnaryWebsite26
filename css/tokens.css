@@ -46,6 +46,7 @@
   --c-accent-hi: #B07DFF;   /* primary hover (6.8:1) */
   --c-accent-text: #B98CFF; /* accent as text on the ground */
   --c-focus:     #E2CCFF;   /* focus ring */
+  --c-on-ink-muted: #4A4252; /* secondary text on the bone footer (8:1) */
   --c-danger:    #FF8FA3;   /* error text */
   --c-success:   #8FE3C0;   /* success text */
   --c-line:      rgba(238, 234, 227, 0.16); /* real tables and form fields only */

@@ -140,34 +140,35 @@ function renderShows(listEl) {
   if (!listEl) return;
   const rows = [...listEl.querySelectorAll('.show-row[data-month]')];
 
-  if (!rows.length) {
-    const empty = document.createElement('p');
-    empty.className = 'shows-empty';
-    empty.append('No shows booked right now. ');
-    const join = document.createElement('a');
-    join.href = '#mailing-list';
-    join.textContent = 'Join the mailing list';
-    empty.append(join, ' to hear first.');
-    const book = document.createElement('p');
-    book.className = 'shows-book';
-    book.append('Want us in your town? ');
-    const mail = document.createElement('a');
-    mail.href = 'mailto:wearelvnary@gmail.com?subject=Booking%20LVNARY';
-    mail.textContent = 'Email us to book a show';
-    book.append(mail, '.');
-    listEl.replaceChildren(empty, book);
-    return;
-  }
-
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
     if (className) node.className = className;
     if (text) node.textContent = text;
     return node;
   };
+  const link = (href, text) => Object.assign(el('a', '', text), { href });
+
+  if (!rows.length) {
+    const panel = el('div', 'shows-none');
+    const insta = link('https://www.instagram.com/wearelvnary/', 'Follow us on Instagram');
+    Object.assign(insta, { target: '_blank', rel: 'noopener noreferrer' });
+    insta.setAttribute('aria-label', 'Follow us on Instagram (opens in new tab)');
+    const empty = el('p', 'shows-empty');
+    empty.append('No shows booked right now. ', link('#mailing-list', 'Join the mailing list'), ' to hear first. ', insta, ' for dates.');
+    const book = el('p', 'shows-book');
+    book.append('Want us in your town? ', link('mailto:wearelvnary@gmail.com?subject=Booking%20LVNARY', 'Email us to book a show'), '.');
+    panel.append(el('p', 'shows-none-title', 'Dates coming soon'), empty, book);
+    listEl.replaceChildren(panel);
+    return;
+  }
+
+  // A show whose data-date has passed is marked Played and moves below the upcoming ones.
+  const today = new Date().toISOString().slice(0, 10);
+  const isPast = row => /^\d{4}-\d{2}-\d{2}$/.test(row.dataset.date || '') && row.dataset.date < today;
+  rows.filter(isPast).forEach(row => { row.classList.add('is-past'); listEl.append(row); });
 
   rows.forEach(row => {
-    const { month = '', day = '', venue = '', location = '', tickets = '' } = row.dataset;
+    const { month = '', day = '', venue = '', location = '', tickets = '', status = '' } = row.dataset;
 
     const date = el('p', 'show-date');
     date.append(el('span', 'show-month', month), el('span', 'show-day', day));
@@ -176,8 +177,13 @@ function renderShows(listEl) {
     info.append(el('p', 'show-venue', venue), el('p', 'show-location', location));
 
     let action;
-    if (/^https?:\/\//.test(tickets)) {
-      action = el('a', 'show-ticket btn btn-ghost', 'Tickets');
+    if (row.classList.contains('is-past')) {
+      action = el('p', 'show-tag', 'Played');
+    } else if (status === 'sold-out') {
+      row.classList.add('is-sold-out');
+      action = el('p', 'show-tag show-tag-sold', 'Sold out');
+    } else if (/^https?:\/\//.test(tickets)) {
+      action = el('a', 'show-ticket btn btn-primary', 'Tickets');
       action.href = tickets;
       action.target = '_blank';
       action.rel = 'noopener noreferrer';
@@ -293,7 +299,10 @@ async function renderMerchStrip(list) {
       const name = document.createElement('span');
       name.className = 'merch-tile-name';
       name.textContent = p.name;
-      link.append(img, name);
+      const frame = document.createElement('span');
+      frame.className = 'merch-tile-photo';
+      frame.append(img);
+      link.append(frame, name);
       if (soldOut) {
         const note = document.createElement('span');
         note.className = 'merch-tile-note';
@@ -307,6 +316,50 @@ async function renderMerchStrip(list) {
   } catch { /* offline or broken file: the button still goes to the store */ }
 }
 
+// ── SPOTIFY PLAYER ──
+// Nothing from Spotify loads until the visitor asks for it. The link works on its own without JavaScript.
+function initPlayer(box) {
+  const trigger = box && box.querySelector('[data-embed]');
+  if (!trigger) return;
+  trigger.addEventListener('click', e => {
+    e.preventDefault();
+    const frame = document.createElement('iframe');
+    Object.assign(frame, {
+      src: trigger.dataset.embed,
+      title: 'LVNARY on Spotify',
+      loading: 'lazy',
+      allow: 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture',
+    });
+    frame.className = 'player-frame';
+    box.classList.add('is-loaded');
+    box.replaceChildren(frame);
+    frame.focus();
+  });
+}
+
+// ── TONIGHT'S MOON ──
+// Phase from the mean synodic month, counted from a known new moon (6 Jan 2000, 18:14 UTC).
+// Accurate to within about a day, which is all a name like "waxing crescent" needs.
+function initMoon(el) {
+  if (!el) return;
+  const SYNODIC = 29.530588853;
+  const age = (((Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % SYNODIC + SYNODIC) % SYNODIC;
+  const lit = (1 - Math.cos((2 * Math.PI * age) / SYNODIC)) / 2;
+  const names = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
+  const name = names[Math.floor(((age / SYNODIC) * 8 + 0.5)) % 8];
+  el.querySelector('.moon-text').textContent = `${name}, ${Math.round(lit * 100)}% lit`;
+
+  // Lit shape: a half disc on the lit side, closed by the terminator, an ellipse whose width follows the phase.
+  const r = 48;
+  const waxing = age < SYNODIC / 2;
+  const rx = Math.abs(1 - 2 * lit) * r;
+  const outer = waxing ? 1 : 0;
+  const inner = (lit > 0.5) === waxing ? 1 : 0; // crescent: terminator bulges toward the lit side
+  el.querySelector('.moon-lit').setAttribute('d',
+    `M0 ${-r} A${r} ${r} 0 0 ${outer} 0 ${r} A${rx.toFixed(2)} ${r} 0 0 ${inner} 0 ${-r}Z`);
+  el.hidden = false;
+}
+
 // ── FOOTER YEAR ──
 function initYear() {
   document.querySelectorAll('[data-year]').forEach(n => { n.textContent = String(new Date().getFullYear()); });
@@ -318,4 +371,6 @@ initHeroParallax();
 renderShows(document.getElementById('showsList'));
 renderMerchStrip(document.getElementById('merchStrip'));
 initSignup(document.getElementById('signup'));
+initPlayer(document.getElementById('player'));
+initMoon(document.getElementById('moon'));
 initYear();

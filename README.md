@@ -260,7 +260,7 @@ To go back to test mode, put the `sk_test_` key and the test webhook secret back
 
 ## Security
 
-- **Content-Security-Policy:** every page has a `<meta http-equiv="Content-Security-Policy">` tag near the top. It only lets the browser load this site's own files and talk to the store worker (`shop-api.lvnary.com`). If you add an embed (a Spotify or YouTube player) or an outside script, add its address to that tag on each page that uses it, or the browser blocks it. The tests fail if any page breaks its own policy.
+- **Content-Security-Policy:** every page has a `<meta http-equiv="Content-Security-Policy">` tag near the top. It only lets the browser load this site's own files and talk to the store worker (`shop-api.lvnary.com`). If you add an embed (a Spotify or YouTube player) or an outside script, add its address to that tag on each page that uses it, or the browser blocks it. The home page already allows `https://open.spotify.com` in `frame-src` for the tap-to-load Spotify player; nothing from Spotify loads until someone taps Play. The tests fail if any page breaks its own policy.
 - **One inline script:** the policy allows exactly one inline script, `document.documentElement.classList.add('js');`, by its hash. Put any other script in a file under `js/`.
 - **Worker limits:** card checkout allows 10 tries a minute and signup 3 a minute per connection (`[[ratelimits]]` in `worker/wrangler.toml`). Venmo, Cash App, and Zelle orders allow 5 an hour, since each one holds stock.
 - **Secrets** live only in Cloudflare (`npx wrangler secret put …`), never in this repo.
