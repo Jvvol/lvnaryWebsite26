@@ -66,14 +66,14 @@
           <div class="section-body">
 
           <div class="release">
-            <h3 class="release-title">Temporary</h3>
-            <p class="release-meta">Single, released 2024</p>
-            <p class="release-copy">Our debut single. Stream it wherever you listen.</p>
+            <div class="release-head">
+              <h3 class="release-title">Temporary</h3>
+              <p class="release-meta">Our debut single, out now</p>
+              <p class="release-copy">Stream it wherever you listen.</p>
+            </div>
 
-            <!--
-            <a href="#bandcamp-link-here" target="_blank" rel="noopener noreferrer" class="platform-link">Bandcamp<span class="visually-hidden"> (opens in new tab)</span></a>
-            -->
-            <ul class="platform-links">
+            <!-- To add Bandcamp, copy a row below and change the link and name. -->
+            <ul class="platform-links" aria-label="Listen to Temporary">
               <li><a href="https://open.spotify.com/artist/7sxtSVf5y0xRBdAt0whc6c" target="_blank" rel="noopener noreferrer" class="platform-link">Spotify<span class="visually-hidden"> (opens in new tab)</span></a></li>
               <li><a href="https://music.apple.com/us/artist/lvnary/1811268474" target="_blank" rel="noopener noreferrer" class="platform-link">Apple Music<span class="visually-hidden"> (opens in new tab)</span></a></li>
               <li><a href="https://music.youtube.com/channel/UCtNkpKaiNgJXASynEbZW-5g" target="_blank" rel="noopener noreferrer" class="platform-link">YouTube Music<span class="visually-hidden"> (opens in new tab)</span></a></li>
@@ -106,10 +106,14 @@
 
       <section id="merch" class="section" aria-labelledby="merch-title">
         <div class="section-inner">
-          <h2 class="section-title" id="merch-title">Merch</h2>
+          <div class="section-head">
+            <h2 class="section-title" id="merch-title">Merch</h2>
+            <a href="/merch/" class="btn btn-primary">Shop merch</a>
+          </div>
           <div class="section-body">
           <p class="lede">Shirts and stickers, packed by the band in Morgantown and shipped anywhere.</p>
-          <a href="/merch/" class="btn btn-primary">Shop merch</a>
+          <!-- Filled from /merch/products.json, so it always matches the store. -->
+          <ul class="merch-strip" id="merchStrip" aria-label="Merch for sale"></ul>
           </div>
         </div>
       </section>

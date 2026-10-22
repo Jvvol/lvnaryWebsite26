@@ -264,6 +264,42 @@ function initSignup(form) {
   });
 }
 
+// ── MERCH STRIP ──
+// A few products from the store file, each linking to that item on the merch page.
+// If the file can't load, the section still has its intro and "Shop merch" button.
+async function renderMerchStrip(list) {
+  if (!list) return;
+  try {
+    const res = await fetch('/merch/products.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const { products } = await res.json();
+    const shown = (Array.isArray(products) ? products : []).filter(p => p && p.status !== 'hidden' && p.photos && p.photos[0]).slice(0, 4);
+    list.style.setProperty('--tiles', String(Math.max(3, shown.length)));
+    list.replaceChildren(...shown.map(p => {
+      const photo = p.photos[0];
+      const soldOut = p.status === 'sold_out' || (Array.isArray(p.variants) && p.variants.every(v => !(v.stock > 0)));
+      const link = document.createElement('a');
+      link.className = 'merch-tile';
+      link.href = `/merch/#product-${encodeURIComponent(p.id)}`;
+      const img = document.createElement('img');
+      Object.assign(img, { src: photo.src, alt: '', width: photo.width, height: photo.height, loading: 'lazy', decoding: 'async' });
+      const name = document.createElement('span');
+      name.className = 'merch-tile-name';
+      name.textContent = p.name;
+      link.append(img, name);
+      if (soldOut) {
+        const note = document.createElement('span');
+        note.className = 'merch-tile-note';
+        note.textContent = 'Sold out';
+        link.append(note);
+      }
+      const item = document.createElement('li');
+      item.append(link);
+      return item;
+    }));
+  } catch { /* offline or broken file: the button still goes to the store */ }
+}
+
 // ── FOOTER YEAR ──
 function initYear() {
   document.querySelectorAll('[data-year]').forEach(n => { n.textContent = String(new Date().getFullYear()); });
@@ -273,5 +309,6 @@ initNav();
 initStarfield(document.querySelector('.starfield'));
 initHeroParallax();
 renderShows(document.getElementById('showsList'));
+renderMerchStrip(document.getElementById('merchStrip'));
 initSignup(document.getElementById('signup'));
 initYear();

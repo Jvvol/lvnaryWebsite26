@@ -107,3 +107,20 @@ test('without JavaScript, the placeholder signup and cookie settings are hidden'
   await expect(page.getByRole('button', { name: 'Cookie settings' })).toBeHidden();
   await context.close();
 });
+
+test('the merch strip shows store products and links to each one', async ({ page }) => {
+  await page.goto('/#merch');
+  const tiles = page.locator('#merchStrip a');
+  await expect(tiles.first()).toBeVisible();
+  const first = await tiles.first().getAttribute('href');
+  expect(first).toMatch(/^\/merch\/#product-[\w-]+$/);
+  await tiles.first().click();
+  await expect(page.locator(first.slice(first.indexOf('#')))).toBeInViewport();
+});
+
+test('a broken products file leaves the merch section with its shop button', async ({ page }) => {
+  await page.route('**/merch/products.json', r => r.fulfill({ status: 500, body: '' }));
+  await page.goto('/#merch');
+  await expect(page.locator('#merchStrip')).toBeHidden();
+  await expect(page.locator('#merch').getByRole('link', { name: 'Shop merch' })).toHaveAttribute('href', '/merch/');
+});

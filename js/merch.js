@@ -119,7 +119,7 @@ function renderProduct(product, index) {
 
   if (single) updateStockNote(form);
 
-  return el('article', { class: `product${soldOut ? ' is-sold-out' : ''}`, 'aria-labelledby': nameId },
+  return el('article', { class: `product${soldOut ? ' is-sold-out' : ''}`, id: `product-${product.id}`, 'aria-labelledby': nameId },
     el('img', { class: 'product-photo', src: photo.src, width: photo.width, height: photo.height, alt: photo.alt, loading: index === 0 ? 'eager' : 'lazy', decoding: 'async' }),
     el('div', { class: 'product-info' },
       el('h2', { class: 'product-name', id: nameId }, nameWithoutHyphenBreaks(product.name)),
@@ -409,6 +409,11 @@ async function init() {
 
   list.replaceChildren(...products.map(renderProduct));
   list.removeAttribute('aria-busy');
+  // Products render after load, so a link like /merch/#product-x needs a nudge to land.
+  if (location.hash.startsWith('#product-')) {
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target) target.scrollIntoView();
+  }
   if (!products.length) showNotice('Nothing is for sale right now. Follow us on Instagram to hear about the next drop.');
 
   if (!checkoutReady()) {
