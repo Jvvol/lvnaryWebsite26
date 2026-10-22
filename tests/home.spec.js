@@ -67,7 +67,7 @@ test('content and footer links work without JavaScript', async ({ browser }) => 
   const page = await context.newPage();
   await page.goto('/');
   for (const name of ['Music', 'Shows', 'Merch', 'About']) {
-    const heading = page.getByRole('heading', { level: 2, name });
+    const heading = page.getByRole('heading', { level: 2, name, exact: true });
     await expect(heading).toBeVisible();
     expect(await heading.evaluate(h => getComputedStyle(h).opacity)).toBe('1');
   }

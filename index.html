@@ -7,12 +7,28 @@
          outside script? Add its address here too (see README, "Security"), or the browser blocks it. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://shop-api.lvnary.com; form-action 'self' https://shop-api.lvnary.com; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <title>LVNARY | Progressive post-hardcore from Morgantown, WV</title>
-    <meta name="description" content="LVNARY is a progressive post-hardcore band from Morgantown, West Virginia. Stream the single Temporary, find upcoming shows, and shop merch.">
-    <meta name="theme-color" content="#0A0920">
+    <meta name="description" content="LVNARY is a progressive post-hardcore band from Morgantown, West Virginia. New music is on the way: join the mailing list, stream the single Temporary, and find shows and merch.">
+    <meta name="theme-color" content="#0A090C">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <!-- Fonts for the first screen: asked for early so text doesn't jump when they arrive. -->
-    <link rel="preload" href="/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/archivo-expanded-800.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="canonical" href="https://lvnary.com/">
+
+    <!-- How the link looks when shared in Instagram, TikTok, iMessage, etc. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="LVNARY">
+    <meta property="og:url" content="https://lvnary.com/">
+    <meta property="og:title" content="LVNARY | New music is coming">
+    <meta property="og:description" content="Progressive post-hardcore from Morgantown, West Virginia. Join the mailing list to hear it first.">
+    <meta property="og:image" content="https://lvnary.com/images/og/lvnary-share.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="The LVNARY wordmark over a black-and-purple photo of the band playing live">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LVNARY | New music is coming">
+    <meta name="twitter:description" content="Progressive post-hardcore from Morgantown, West Virginia. Join the mailing list to hear it first.">
+    <meta name="twitter:image" content="https://lvnary.com/images/og/lvnary-share.jpg">
     <link rel="preload" href="images/band/hero-band.jpg" as="image" fetchpriority="high">
 
     <script>document.documentElement.classList.add('js');</script>
@@ -24,8 +40,23 @@
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
+    <!-- The LVNARY wordmark, redrawn from the band's logo (open L, V and Λ). Used by the header and hero.
+         TODO: swap these paths for the official logo vector file if the band has one. -->
+    <svg class="svg-defs" aria-hidden="true" focusable="false" width="0" height="0">
+      <symbol id="lvnary-logo" viewBox="0 0 656 100">
+        <g fill="none" stroke="currentColor" stroke-width="13" stroke-miterlimit="10">
+          <path d="M6.5-10V80M0 93.5H44"/>
+          <path d="M78-10L123 108 168-10"/>
+          <path d="M206.5-10V110M204-12L284 112M281.5-10V110"/>
+          <path d="M318 110L363-8 408 110"/>
+          <path d="M446.5-10V110M440 6.5H497a25 25 0 0 1 0 50H446M486 56L528 110"/>
+          <path d="M560-10L605 54 650-10M605 50V110"/>
+        </g>
+      </symbol>
+    </svg>
+
     <header class="site-header" id="siteHeader">
-      <a href="#home" class="brand">LVNARY</a>
+      <a href="#home" class="brand" aria-label="LVNARY, back to top"><svg class="brand-mark" aria-hidden="true" focusable="false"><use href="#lvnary-logo"/></svg></a>
 
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Menu">
         <span class="nav-toggle-bar" aria-hidden="true"></span>
@@ -49,13 +80,33 @@
         <canvas class="starfield" aria-hidden="true"></canvas>
 
         <div class="hero-content">
-          <h1 class="hero-wordmark" id="hero-title">LVNARY</h1>
-          <p class="hero-tagline">Progressive post-hardcore from Morgantown, West Virginia</p>
-          <p class="hero-pronounce">Pronounced loo-nuh-ree</p>
+          <div class="hero-name">
+            <h1 class="hero-wordmark" id="hero-title">
+              <svg class="hero-logo" role="img" aria-labelledby="hero-logo-title" focusable="false"><title id="hero-logo-title">LVNARY</title><use href="#lvnary-logo"/></svg>
+            </h1>
+            <p class="hero-tagline">Progressive post-hardcore from Morgantown, West Virginia <span class="hero-pronounce">Pronounced loo-nuh-ree</span></p>
+          </div>
 
-          <div class="hero-actions">
-            <a href="#music" class="btn btn-primary">Listen</a>
-            <a href="#shows" class="btn btn-ghost">See shows</a>
+          <div class="hero-news">
+            <!-- TODO: when the release has a title and date, put them here, e.g.
+                 <p class="hero-release">[Title], out [Month Day]</p>
+                 and once there's a pre-save link, make it the primary button below
+                 (swap "Join the mailing list" to a ghost button). -->
+            <h2 class="hero-headline">New music is coming</h2>
+            <p class="hero-lede">Be first to hear it. Join the mailing list for the release date and new songs.</p>
+
+            <div class="hero-actions">
+              <a href="#mailing-list" class="btn btn-primary btn-lg">Join the mailing list</a>
+              <a href="#music" class="btn btn-ghost btn-lg">Listen to Temporary</a>
+            </div>
+
+            <ul class="socials socials-hero" aria-label="Follow LVNARY">
+              <li><a href="https://www.instagram.com/wearelvnary/" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Instagram (opens in new tab)"><img src="images/socials/instagram.svg" width="26" height="26" alt=""></a></li>
+              <li><a href="https://www.tiktok.com/@lvnary" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on TikTok (opens in new tab)"><img src="images/socials/tiktok.svg" width="26" height="26" alt=""></a></li>
+              <li><a href="https://www.youtube.com/@LVNARY-304" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on YouTube (opens in new tab)"><img src="images/socials/youtube.svg" width="26" height="26" alt=""></a></li>
+              <li><a href="https://open.spotify.com/artist/7sxtSVf5y0xRBdAt0whc6c" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Spotify (opens in new tab)"><img src="images/socials/spotify.svg" width="26" height="26" alt=""></a></li>
+              <li><a href="https://www.facebook.com/lunarybandofficial/" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Facebook (opens in new tab)"><img src="images/socials/facebook.svg" width="26" height="26" alt=""></a></li>
+            </ul>
           </div>
         </div>
 
@@ -63,6 +114,43 @@
           <svg class="ridge ridge-far" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><path d="M-48,70.3 C16,58.7 32,67.4 48,71.8 C64,76.1 80,82.0 96,84.7 C112,87.4 128,85.6 144,87.9 C160,90.3 176,93.5 192,98.8 C208,104.0 224,114.9 240,119.4 C256,123.9 272,127.1 288,125.8 C304,124.4 320,115.2 336,111.3 C352,107.4 368,101.9 384,102.5 C400,103.0 416,109.9 432,114.3 C448,118.8 464,125.7 480,129.0 C496,132.2 512,131.2 528,133.9 C544,136.6 560,139.1 576,145.4 C592,151.7 608,164.5 624,171.6 C640,178.6 656,187.2 672,187.8 C688,188.5 704,181.4 720,175.5 C736,169.6 752,158.5 768,152.6 C784,146.7 800,144.1 816,140.0 C832,135.8 848,133.7 864,127.6 C880,121.4 896,110.2 912,103.1 C928,95.9 944,86.6 960,84.6 C976,82.7 992,87.8 1008,91.6 C1024,95.5 1040,105.1 1056,107.7 C1072,110.3 1088,109.0 1104,107.3 C1120,105.5 1136,98.9 1152,97.2 C1168,95.5 1184,96.7 1200,97.0 C1216,97.3 1232,100.9 1248,98.8 C1264,96.7 1280,89.8 1296,84.6 C1312,79.4 1328,69.2 1344,67.6 C1360,65.9 1376,69.0 1392,74.7 C1408,80.3 1424,93.5 1440,101.3 L1488,320 L-48,320 Z"/></svg>
           <svg class="ridge ridge-mid" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><path d="M-48,196.7 C16,192.3 32,194.8 48,195.7 C64,196.5 80,198.5 96,197.5 C112,196.4 128,190.3 144,189.5 C160,188.7 176,189.1 192,192.8 C208,196.5 224,208.0 240,211.8 C256,215.5 272,218.4 288,215.4 C304,212.5 320,201.2 336,194.1 C352,186.9 368,178.7 384,172.6 C400,166.4 416,163.4 432,157.1 C448,150.9 464,141.1 480,135.0 C496,129.0 512,120.8 528,120.9 C544,121.0 560,129.3 576,135.8 C592,142.3 608,154.8 624,159.9 C640,164.9 656,165.0 672,166.0 C688,167.0 704,164.5 720,165.9 C736,167.2 752,172.3 768,174.1 C784,175.8 800,176.7 816,176.2 C832,175.7 848,169.7 864,170.9 C880,172.2 896,176.7 912,183.7 C928,190.7 944,205.9 960,213.0 C976,220.1 992,225.3 1008,226.1 C1024,227.0 1040,220.8 1056,217.9 C1072,215.0 1088,212.5 1104,208.5 C1120,204.6 1136,201.6 1152,194.1 C1168,186.7 1184,172.9 1200,164.1 C1216,155.3 1232,144.4 1248,141.6 C1264,138.8 1280,144.3 1296,147.1 C1312,149.9 1328,157.0 1344,158.3 C1360,159.7 1376,156.1 1392,155.0 C1408,154.0 1424,152.0 1440,152.3 L1488,320 L-48,320 Z"/></svg>
           <svg class="ridge ridge-near" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" focusable="false"><path d="M-48,221.1 C16,219.1 32,216.7 48,212.8 C64,208.8 80,201.1 96,196.8 C112,192.5 128,187.6 144,187.0 C160,186.3 176,189.6 192,192.8 C208,196.0 224,202.3 240,206.0 C256,209.6 272,212.0 288,214.8 C304,217.5 320,218.5 336,222.4 C352,226.2 368,232.2 384,238.0 C400,243.9 416,252.9 432,257.6 C448,262.4 464,265.9 480,266.4 C496,266.9 512,262.9 528,260.8 C544,258.7 560,254.9 576,253.9 C592,252.9 608,254.4 624,254.9 C640,255.3 656,257.3 672,256.6 C688,256.0 704,253.0 720,251.1 C736,249.3 752,245.4 768,245.4 C784,245.4 800,248.0 816,251.1 C832,254.2 848,261.1 864,264.2 C880,267.2 896,269.6 912,269.2 C928,268.8 944,264.4 960,261.6 C976,258.8 992,254.6 1008,252.2 C1024,249.8 1040,249.6 1056,247.3 C1072,245.0 1088,243.2 1104,238.5 C1120,233.8 1136,225.6 1152,218.9 C1168,212.3 1184,203.1 1200,198.6 C1216,194.1 1232,192.1 1248,192.0 C1264,191.8 1280,195.8 1296,197.5 C1312,199.2 1328,201.3 1344,202.1 C1360,203.0 1376,201.5 1392,202.6 C1408,203.7 1424,205.3 1440,208.8 L1488,320 L-48,320 Z"/></svg>
+        </div>
+      </section>
+
+      <section id="mailing-list" class="section section-signup" aria-labelledby="signup-title">
+        <div class="section-inner">
+          <h2 class="section-title" id="signup-title">Join the mailing list</h2>
+          <div class="section-body">
+          <p class="lede">New music, show dates, and merch drops, a few times a year.</p>
+
+          <!-- Signups go to the store worker, which saves them in Cloudflare. Export with: npm run subscribers -->
+          <p class="lede nojs-only">Signup needs JavaScript. Follow us on Instagram for news in the meantime.</p>
+          <form id="signup" class="signup" method="post" action="https://shop-api.lvnary.com/subscribe" novalidate>
+            <div class="field">
+              <label for="signup-email">Email address</label>
+              <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <p class="field-error" id="signup-email-error" hidden></p>
+            </div>
+
+            <div class="field field-check">
+              <input id="signup-consent" name="consent" type="checkbox" value="yes" required>
+              <label for="signup-consent">I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.</label>
+              <p class="field-error" id="signup-consent-error" hidden></p>
+            </div>
+
+            <div class="field-trap" aria-hidden="true">
+              <label for="signup-website">Leave this empty</label>
+              <input id="signup-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
+            <p class="signup-privacy">We only use your email to send these updates. <a href="/privacy/">Privacy policy</a></p>
+
+            <div class="signup-submit">
+              <button type="submit" class="btn btn-primary">Subscribe</button>
+              <p class="signup-status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+          </div>
         </div>
       </section>
 
@@ -141,6 +229,11 @@
               </p>
               <p>Built for listeners who want music that challenges and grooves in equal measure.</p>
               <p class="fans-of">For fans of Polyphia, Dance Gavin Dance, Unprocessed, and Saosin.</p>
+
+              <div class="booking" id="booking">
+                <h3 class="booking-title">Booking and press</h3>
+                <a class="booking-link" href="mailto:wearelvnary@gmail.com?subject=Booking%20LVNARY">wearelvnary@gmail.com</a>
+              </div>
             </div>
           </div>
 
@@ -187,48 +280,22 @@
           </div>
         </div>
       </section>
-
-      <section id="mailing-list" class="section section-signup" aria-labelledby="signup-title">
-        <div class="section-inner">
-          <h2 class="section-title" id="signup-title">Mailing list</h2>
-          <div class="section-body">
-          <p class="lede">New music, show dates, and merch drops, a few times a year.</p>
-
-          <!-- Signups go to the store worker, which saves them in Cloudflare. Export with: npm run subscribers -->
-          <p class="lede nojs-only">Signup needs JavaScript. Follow us on Instagram for news in the meantime.</p>
-          <form id="signup" class="signup" method="post" action="https://shop-api.lvnary.com/subscribe" novalidate>
-            <div class="field">
-              <label for="signup-email">Email address</label>
-              <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-              <p class="field-error" id="signup-email-error" hidden></p>
-            </div>
-
-            <div class="field field-check">
-              <input id="signup-consent" name="consent" type="checkbox" value="yes" required>
-              <label for="signup-consent">I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.</label>
-              <p class="field-error" id="signup-consent-error" hidden></p>
-            </div>
-
-            <div class="field-trap" aria-hidden="true">
-              <label for="signup-website">Leave this empty</label>
-              <input id="signup-website" name="website" tabindex="-1" autocomplete="off">
-            </div>
-
-            <p class="signup-privacy">We only use your email to send these updates. <a href="/privacy/">Privacy policy</a></p>
-
-            <div class="signup-submit">
-              <button type="submit" class="btn btn-primary">Subscribe</button>
-              <p class="signup-status" role="status" aria-live="polite"></p>
-            </div>
-          </form>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer">
       <svg class="footer-ridge" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false"><path d="M-48,221.1 C16,219.1 32,216.7 48,212.8 C64,208.8 80,201.1 96,196.8 C112,192.5 128,187.6 144,187.0 C160,186.3 176,189.6 192,192.8 C208,196.0 224,202.3 240,206.0 C256,209.6 272,212.0 288,214.8 C304,217.5 320,218.5 336,222.4 C352,226.2 368,232.2 384,238.0 C400,243.9 416,252.9 432,257.6 C448,262.4 464,265.9 480,266.4 C496,266.9 512,262.9 528,260.8 C544,258.7 560,254.9 576,253.9 C592,252.9 608,254.4 624,254.9 C640,255.3 656,257.3 672,256.6 C688,256.0 704,253.0 720,251.1 C736,249.3 752,245.4 768,245.4 C784,245.4 800,248.0 816,251.1 C832,254.2 848,261.1 864,264.2 C880,267.2 896,269.6 912,269.2 C928,268.8 944,264.4 960,261.6 C976,258.8 992,254.6 1008,252.2 C1024,249.8 1040,249.6 1056,247.3 C1072,245.0 1088,243.2 1104,238.5 C1120,233.8 1136,225.6 1152,218.9 C1168,212.3 1184,203.1 1200,198.6 C1216,194.1 1232,192.1 1248,192.0 C1264,191.8 1280,195.8 1296,197.5 C1312,199.2 1328,201.3 1344,202.1 C1360,203.0 1376,201.5 1392,202.6 C1408,203.7 1424,205.3 1440,208.8 L1488,320 L-48,320 Z"/></svg>
       <div class="footer-inner">
+
+        <div class="footer-connect">
+          <p class="footer-booking">Booking and press: <a href="mailto:wearelvnary@gmail.com?subject=Booking%20LVNARY">wearelvnary@gmail.com</a></p>
+          <ul class="socials" aria-label="Follow LVNARY">
+            <li><a href="https://www.instagram.com/wearelvnary/" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Instagram (opens in new tab)"><img src="images/socials/instagram.svg" width="22" height="22" alt=""></a></li>
+            <li><a href="https://www.tiktok.com/@lvnary" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on TikTok (opens in new tab)"><img src="images/socials/tiktok.svg" width="22" height="22" alt=""></a></li>
+            <li><a href="https://www.youtube.com/@LVNARY-304" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on YouTube (opens in new tab)"><img src="images/socials/youtube.svg" width="22" height="22" alt=""></a></li>
+            <li><a href="https://open.spotify.com/artist/7sxtSVf5y0xRBdAt0whc6c" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Spotify (opens in new tab)"><img src="images/socials/spotify.svg" width="22" height="22" alt=""></a></li>
+            <li><a href="https://www.facebook.com/lunarybandofficial/" target="_blank" rel="noopener noreferrer" aria-label="LVNARY on Facebook (opens in new tab)"><img src="images/socials/facebook.svg" width="22" height="22" alt=""></a></li>
+          </ul>
+        </div>
 
         <nav aria-label="Legal" class="footer-nav">
           <ul>

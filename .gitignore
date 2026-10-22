@@ -4,3 +4,4 @@ playwright-report/
 .wrangler/
 .dev.vars
 subscribers.csv
+.taste-skill/

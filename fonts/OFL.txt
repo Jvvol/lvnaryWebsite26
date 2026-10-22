@@ -1,4 +1,4 @@
-Michroma: Copyright 2011 The Michroma Project Authors (https://github.com/googlefonts/Michroma-font)
+Archivo: Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
 IBM Plex Sans: Copyright 2019 IBM Corp.
 
 

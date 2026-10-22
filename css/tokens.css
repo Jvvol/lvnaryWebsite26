@@ -1,8 +1,10 @@
 /* ── FONTS (self-hosted, SIL OFL — see /fonts/OFL.txt) ── */
+/* Archivo Expanded, heavy: the poster voice. One file covers weights 800–900 at 125% width. */
 @font-face {
-  font-family: 'Michroma';
-  src: url('../fonts/michroma-400.woff2') format('woff2');
-  font-weight: 400;
+  font-family: 'Archivo Expanded';
+  src: url('../fonts/archivo-expanded-800.woff2') format('woff2');
+  font-weight: 800 900;
+  font-stretch: 125%;
   font-style: normal;
   font-display: swap;
 }
@@ -32,39 +34,59 @@
 :root {
   color-scheme: dark;
 
-  /* Color: night over the ridge */
-  --c-void:      #0A0920;   /* page background */
-  --c-ridge:     #151338;   /* surfaces, nearest ridge */
-  --c-ridge-mid: #1D1A4A;   /* middle ridge */
-  --c-ridge-far: #28235E;   /* farthest ridge */
-  --c-violet:    #6A4BE0;   /* primary buttons */
-  --c-violet-hi: #7D61EC;   /* primary hover */
-  --c-blue:      #5FA8FF;   /* links, focus */
-  --c-lavender:  #C9BEFF;   /* secondary emphasis */
-  --c-text:      #EEF0FF;   /* body text */
-  --c-muted:     #A6A3CC;   /* muted text */
-  --c-danger:    #FF9BB0;   /* error text */
+  /* Color: a xeroxed show poster under a night sky. Black ground, bone paper ink,
+     and the purple from the band's own shirt print as the one accent.
+     Contrast on --c-ground: ink 16.6:1, muted 8.4:1, accent text 7.8:1, focus 13.5:1. */
+  --c-ground:    #0A090C;   /* page background */
+  --c-surface:   #15121A;   /* one tone step up: panels, nearest ridge */
+  --c-surface-2: #1E1A25;   /* two steps up: hover fills, farthest ridge */
+  --c-ink:       #EEEAE3;   /* body text, bone paper */
+  --c-muted:     #ADA6B5;   /* secondary text */
+  --c-accent:    #9D5CFF;   /* the primary action (ground-colored text on it: 5.1:1) */
+  --c-accent-hi: #B07DFF;   /* primary hover (6.8:1) */
+  --c-accent-text: #B98CFF; /* accent as text on the ground */
+  --c-focus:     #E2CCFF;   /* focus ring */
+  --c-danger:    #FF8FA3;   /* error text */
   --c-success:   #8FE3C0;   /* success text */
-  --c-border:    rgba(201, 190, 255, 0.18);
-  --c-border-hi: rgba(201, 190, 255, 0.42);
-  --c-scrim:     rgba(10, 9, 32, 0.86);
+  --c-line:      rgba(238, 234, 227, 0.16); /* real tables and form fields only */
+  --c-line-hi:   rgba(238, 234, 227, 0.5);
+  --c-scrim:     rgba(10, 9, 12, 0.9);
 
-  /* Type */
-  --font-display: 'Michroma', 'Eurostile', 'Arial', sans-serif;
+  /* Older names, still used by the merch and legal pages. */
+  --c-void:      var(--c-ground);
+  --c-ridge:     var(--c-surface);
+  --c-ridge-mid: var(--c-surface-2);
+  --c-ridge-far: var(--c-surface-2);
+  --c-violet:    var(--c-accent);
+  --c-violet-hi: var(--c-accent-hi);
+  --c-blue:      var(--c-accent-text);
+  --c-lavender:  var(--c-accent-text);
+  --c-text:      var(--c-ink);
+  --c-border:    var(--c-line);
+  --c-border-hi: var(--c-line-hi);
+
+  /* Photocopy grain: tiny SVG noise, laid over photos and the hero. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Type: a heavy expanded poster face for headings, a plain readable face for everything else. */
+  --font-display: 'Archivo Expanded', 'Arial Black', sans-serif;
   --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /* Modular scale, ratio 1.25 from 1.0625rem */
-  --step--1: 0.85rem;
+  /* Five sizes do the work: small, body, lead, section heading, poster statement.
+     The wordmark is sized by width, not by this scale. */
+  --step--1: 0.875rem;
   --step-0:  1.0625rem;
-  --step-1:  1.328rem;
-  --step-2:  1.66rem;
-  --step-3:  clamp(1.66rem, 1.3rem + 1.6vw, 2.075rem);
-  --step-4:  clamp(2.075rem, 1.5rem + 2.4vw, 2.594rem);
-  --step-5:  clamp(2.3rem, 1.6rem + 3.2vw, 3.24rem);
-  --step-hero: clamp(2.4rem, 11vw, 8rem);
+  --step-1:  1.25rem;
+  --step-2:  clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);
+  --step-3:  clamp(2.25rem, 1.2rem + 4.4vw, 4.75rem);
+  /* Older steps, mapped onto the five. */
+  --step-4:  var(--step-2);
+  --step-5:  var(--step-3);
+  --step-hero: var(--step-3);
 
   --leading-body: 1.6;
-  --leading-tight: 1.1;
+  --leading-tight: 0.95;
+  --tracking-display: -0.02em;
   --measure: 68ch;
 
   /* Spacing */
@@ -77,18 +99,21 @@
   --space-7: 3rem;
   --space-8: 5rem;
 
-  --gutter: max(1rem, 5vw);
-  --content-max: 80rem;
+  /* One pair of outer margins for the whole page: header, hero, sections and footer share it. */
+  --gutter: clamp(1rem, 2.2vw, 2rem);
+  --gutter-tight: var(--gutter);
+  --content-max: 100rem;
 
-  /* Shape */
-  --radius-sm: 4px;
-  --radius-md: 10px;
+  /* Shape: square, like cut paper. */
+  --radius-sm: 0;
+  --radius-md: 0;
 
   /* Motion */
   --dur-fast: 150ms;
   --dur-med: 300ms;
-  --dur-slow: 1600ms;
-  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --dur-slow: 900ms;
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
 
   /* Layers */
   --z-nav: 100;
@@ -96,5 +121,5 @@
   --z-dialog: 300;
 
   /* Focus */
-  --focus-ring: 0 0 0 2px var(--c-void), 0 0 0 4px var(--c-blue);
+  --focus-ring: 0 0 0 2px var(--c-ground), 0 0 0 5px var(--c-focus);
 }

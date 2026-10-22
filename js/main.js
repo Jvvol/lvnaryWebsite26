@@ -78,7 +78,7 @@ function initStarfield(canvas) {
       const twinkle = t ? 0.5 + 0.5 * Math.sin(t * s.speed + s.phase) : 0.75;
       const x = t ? (s.x + t * s.drift) % width : s.x;
       ctx.globalAlpha = s.base * (0.45 + 0.55 * twinkle);
-      ctx.fillStyle = s.r > 1.2 ? '#C9BEFF' : '#EEF0FF';
+      ctx.fillStyle = s.r > 1.2 ? '#E2CCFF' : '#EEEAE3';
       ctx.beginPath();
       ctx.arc(x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
@@ -148,7 +148,14 @@ function renderShows(listEl) {
     join.href = '#mailing-list';
     join.textContent = 'Join the mailing list';
     empty.append(join, ' to hear first.');
-    listEl.replaceChildren(empty);
+    const book = document.createElement('p');
+    book.className = 'shows-book';
+    book.append('Want us in your town? ');
+    const mail = document.createElement('a');
+    mail.href = 'mailto:wearelvnary@gmail.com?subject=Booking%20LVNARY';
+    mail.textContent = 'Email us to book a show';
+    book.append(mail, '.');
+    listEl.replaceChildren(empty, book);
     return;
   }
 
