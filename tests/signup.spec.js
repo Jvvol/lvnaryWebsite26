@@ -19,7 +19,7 @@ async function expectFieldError(page, field, message) {
   expect(texts.join(' ')).toContain(message);
 }
 
-// Points the form at a fake provider so the placeholder check doesn't short-circuit.
+// Points the form at a fake worker so tests never reach the real one.
 async function useProvider(page) {
   await form(page).evaluate((f, url) => { f.action = url; }, PROVIDER);
 }
@@ -51,19 +51,16 @@ test('consent is required', async ({ page }) => {
   await expectFieldError(page, consent(page), "Check the box to confirm you're 16 or older and want our emails.");
 });
 
-test('placeholder provider shows coming-soon and sends nothing', async ({ page }) => {
-  const external = externalRequests(page);
-  await email(page).fill('fan@example.com');
-  await consent(page).check();
-  await submit(page).click();
-  await expect(status(page)).toHaveText('Signup opens soon. Follow us on Instagram for news in the meantime.');
-  expect(external).toEqual([]);
+test('the form sends signups to the store worker', async ({ page }) => {
+  await expect(form(page)).toHaveAttribute('action', 'https://shop-api.lvnary.com/subscribe');
 });
 
 test('successful signup shows loading then confirmation', async ({ page }) => {
-  let release;
+  let release, sent;
   const held = new Promise(r => { release = r; });
   await page.route(PROVIDER, async route => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' } });
+    sent = route.request().postDataJSON();
     await held;
     route.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: '{"status":"success"}' });
   });
@@ -74,11 +71,28 @@ test('successful signup shows loading then confirmation', async ({ page }) => {
   await expect(submit(page)).toHaveText('Subscribing…');
   await expect(submit(page)).toBeDisabled();
   release();
-  await expect(status(page)).toHaveText('Check your inbox to confirm your subscription.');
+  await expect(status(page)).toHaveText("You're on the list. Thanks for signing up.");
+  expect(sent).toEqual({ email: 'fan@example.com', consent: true, website: '' });
+  await expect(email(page)).toHaveValue('');
+});
+
+test('problems the worker finds show on the field', async ({ page }) => {
+  await page.route(PROVIDER, route => route.fulfill({
+    status: route.request().method() === 'OPTIONS' ? 204 : 422,
+    headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' },
+    contentType: 'application/json',
+    body: JSON.stringify({ fieldErrors: { email: 'Enter an email address like name@example.com.' } }),
+  }));
+  await useProvider(page);
+  await email(page).fill('fan@example.c');
+  await consent(page).check();
+  await submit(page).click();
+  await expectFieldError(page, email(page), 'Enter an email address like name@example.com.');
+  await expect(email(page)).toBeFocused();
 });
 
 test('provider error lets you retry', async ({ page }) => {
-  await page.route(PROVIDER, route => route.fulfill({ status: 500, headers: CORS, body: '' }));
+  await page.route(PROVIDER, route => route.fulfill({ status: route.request().method() === 'OPTIONS' ? 204 : 500, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' }));
   await useProvider(page);
   await email(page).fill('fan@example.com');
   await consent(page).check();

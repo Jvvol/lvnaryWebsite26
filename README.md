@@ -225,16 +225,25 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 
 ---
 
-### 8. Mailing list (Kit)
+### 8. Mailing list
 
-The signup form on the home page sends to [Kit](https://kit.com) (free up to 10,000 subscribers). Until it's connected, the form says "Signup opens soon."
+The signup form on the home page saves addresses in the store worker's Cloudflare storage. It's free and needs no other account. Nothing to set up: it works once the worker is deployed.
 
-1. Sign up at [kit.com](https://kit.com) with the band email.
-2. **Grow → Landing Pages & Forms → Create new → Form → Inline**, pick any template, and save it. The look doesn't matter; the site uses its own form.
-3. In the form's **Settings → Incentive**, turn on **Send incentive email**. That's double opt-in: people confirm by email before they're added.
-4. Copy the form's number from the address bar (`app.kit.com/forms/1234567/edit` → `1234567`).
-5. In `index.html`, search for `[TODO: mailing list provider form URL]` and replace the form's `action` with `https://app.kit.com/forms/1234567/subscriptions` (your number). Commit.
-6. Sign up on lvnary.com with your own address and check the confirmation email arrives.
+**Download the list:** on a computer with this folder (after `npm install` and `npx wrangler login`), run:
+
+```sh
+npm run subscribers
+```
+
+That writes `subscribers.csv`: each address, when they signed up, and the exact wording they agreed to. The file is never committed, so keep it private.
+
+**Someone asks to unsubscribe or be deleted:**
+
+```sh
+npm run subscribers -- --remove fan@example.com
+```
+
+**Sending an email to the list:** don't paste the list into Gmail's BCC. It looks like spam and Gmail limits it to a few hundred a day. Upload `subscribers.csv` into a free sending service (MailerLite, Brevo, or Kit all have free plans), which adds the unsubscribe link and the mailing address that US law (CAN-SPAM) requires at the bottom of every marketing email. A PO box works for that address. Then add the service's name to the "Who we share it with" list in `privacy/index.html`.
 
 ## Switching from test mode to live
 

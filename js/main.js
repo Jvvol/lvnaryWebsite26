@@ -184,10 +184,10 @@ function renderShows(listEl) {
 }
 
 // ── MAILING LIST SIGNUP ──
-// Posts straight to the mailing-list provider; no provider script runs on this site.
+// Posts to the store worker, which saves the address. No third-party script runs on this site.
 function initSignup(form) {
   if (!form) return;
-  const email = form.elements.email_address;
+  const email = form.elements.email;
   const consent = form.elements.consent;
   const button = form.querySelector('button[type="submit"]');
   const status = form.querySelector('[role="status"]');
@@ -234,21 +234,24 @@ function initSignup(form) {
     setStatus('');
     if (!validate()) return;
 
-    if (form.getAttribute('action').includes('[TODO')) {
-      setStatus('Signup opens soon. Follow us on Instagram for news in the meantime.');
-      return;
-    }
-
     setBusy(true);
     try {
       const res = await fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.value.trim(), consent: consent.checked, website: form.elements.website.value }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (data.fieldErrors) {
+        setError(email, data.fieldErrors.email || '');
+        setError(consent, data.fieldErrors.consent || '');
+        (data.fieldErrors.email ? email : consent).focus();
+        return;
+      }
+      if (res.status === 429) { setStatus(data.error, 'error'); return; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       form.reset();
-      setStatus('Check your inbox to confirm your subscription.', 'success');
+      setStatus("You're on the list. Thanks for signing up.", 'success');
     } catch (err) {
       // fetch throws TypeError when the request can't complete (offline, or the provider
       // doesn't send CORS headers). Never resubmit: the provider may already have the signup.

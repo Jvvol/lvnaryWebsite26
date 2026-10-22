@@ -184,13 +184,12 @@
           <div class="section-body">
           <p class="lede">New music, show dates, and merch drops, a few times a year.</p>
 
-          <!-- Kit: replace the action with https://app.kit.com/forms/YOUR_FORM_ID/subscriptions (README, "Mailing list (Kit)").
-               Until then the form says "Signup opens soon." -->
+          <!-- Signups go to the store worker, which saves them in Cloudflare. Export with: npm run subscribers -->
           <p class="lede nojs-only">Signup needs JavaScript. Follow us on Instagram for news in the meantime.</p>
-          <form id="signup" class="signup" method="post" action="[TODO: mailing list provider form URL]" novalidate>
+          <form id="signup" class="signup" method="post" action="https://shop-api.lvnary.com/subscribe" novalidate>
             <div class="field">
               <label for="signup-email">Email address</label>
-              <input id="signup-email" name="email_address" type="email" autocomplete="email" inputmode="email" required>
+              <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" required>
               <p class="field-error" id="signup-email-error" hidden></p>
             </div>
 
@@ -198,6 +197,11 @@
               <input id="signup-consent" name="consent" type="checkbox" value="yes" required>
               <label for="signup-consent">I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.</label>
               <p class="field-error" id="signup-consent-error" hidden></p>
+            </div>
+
+            <div class="field-trap" aria-hidden="true">
+              <label for="signup-website">Leave this empty</label>
+              <input id="signup-website" name="website" tabindex="-1" autocomplete="off">
             </div>
 
             <p class="signup-privacy">We only use your email to send these updates. <a href="/privacy/">Privacy policy</a></p>

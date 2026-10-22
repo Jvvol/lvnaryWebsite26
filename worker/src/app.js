@@ -2,6 +2,7 @@
 // POST /checkout        bag → Stripe Checkout page (card, Apple Pay, Google Pay)
 // POST /order           bag + address → Venmo / Cash App / Zelle order, emailed to the band
 // POST /stripe-webhook  Stripe says "paid" → lower stock, email the band
+// POST /subscribe       mailing list signup → saved in KV (export with npm run subscribers)
 // Prices and stock always come from products.json on GitHub, never from the browser.
 
 import { quote, checkStoreFiles, formatMoney, ZONES } from '../../js/store-core.js';
@@ -11,6 +12,9 @@ import { ZONE_COUNTRIES } from './countries.js';
 
 const APP_NAMES = { venmo: 'Venmo', cash_app: 'Cash App', zelle: 'Zelle' };
 const P2P_ORDERS_PER_HOUR = 5;
+const SIGNUPS_PER_HOUR = 5;
+// Saved with each signup, so the list records exactly what each person agreed to.
+export const SIGNUP_CONSENT = "I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.";
 const DAY = 86400;
 
 function json(body, status, cors) {
@@ -174,6 +178,31 @@ async function createP2POrder(request, env, cors, deps) {
   return json({ order, totalCents: q.totalCents, app: form.app, appName: APP_NAMES[form.app], handle }, 200, cors);
 }
 
+// ── Mailing list signup ──
+// Each address is one KV key, "sub:<email>". The details ride in the key's metadata, so
+// one key listing returns the whole list. Signing up twice just refreshes the date.
+async function subscribe(request, env, cors) {
+  const body = await readJson(request);
+  const retry = { error: 'Something went wrong on our end. Try again in a minute.' };
+  if (!body || body.website) return json(retry, 400, cors);
+
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const fieldErrors = {};
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) fieldErrors.email = 'Enter an email address like name@example.com.';
+  if (body.consent !== true) fieldErrors.consent = "Check the box to confirm you're 16 or older and want our emails.";
+  if (Object.keys(fieldErrors).length) return json({ fieldErrors }, 422, cors);
+
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rlKey = `rl-sub:${ip}:${Math.floor(Date.now() / 3600000)}`;
+  const count = Number(await env.STORE_KV.get(rlKey)) || 0;
+  if (count >= SIGNUPS_PER_HOUR) return json({ error: 'Too many signups from this connection. Try again in an hour.' }, 429, cors);
+  await env.STORE_KV.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+
+  const metadata = { email, signed_up: new Date().toISOString(), consent: SIGNUP_CONSENT };
+  await env.STORE_KV.put(`sub:${email}`, '', { metadata });
+  return json({ ok: true }, 200, cors);
+}
+
 // ── Stripe webhook ──
 async function handleWebhook(request, env, deps) {
   const payload = await request.text();
@@ -240,11 +269,13 @@ export async function handle(request, env, deps) {
     if (request.method === 'POST' && url.pathname === '/stripe-webhook') return await handleWebhook(request, env, deps);
     if (request.method === 'POST' && url.pathname === '/checkout') return await createCheckout(request, env, cors);
     if (request.method === 'POST' && url.pathname === '/order') return await createP2POrder(request, env, cors, deps);
+    if (request.method === 'POST' && url.pathname === '/subscribe') return await subscribe(request, env, cors);
     return json({ error: 'Not found' }, 404, cors);
   } catch (err) {
     console.error(err);
     // Webhooks get a 500 so Stripe retries; shoppers get a plain next step.
     if (url.pathname === '/stripe-webhook') return new Response('Error', { status: 500 });
+    if (url.pathname === '/subscribe') return json({ error: 'Something went wrong on our end. Try again in a minute.' }, 502, cors);
     return json({ error: 'Checkout is having trouble right now. Try again in a few minutes, or message us on Instagram.' }, 502, cors);
   }
 }

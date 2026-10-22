@@ -416,6 +416,7 @@ main:focus { outline: none; }
 .field-check .field-error { grid-column: 2; }
 
 .field-error { color: var(--c-danger); font-size: var(--step--1); font-weight: 500; }
+.field-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .signup-privacy { color: var(--c-muted); font-size: var(--step--1); }
 
 .signup-submit { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }

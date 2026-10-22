@@ -191,7 +191,6 @@
 .choice { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; }
 .choice input { width: 1.25rem; height: 1.25rem; accent-color: var(--c-violet); }
 .field-row { display: grid; gap: var(--space-4); }
-.field-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 
 .placed { display: grid; gap: var(--space-3); max-width: var(--measure); margin-top: var(--space-5); padding: var(--space-5); border-left: 3px solid var(--c-success); background: rgba(143, 227, 192, 0.07); }
 .placed:focus { outline: none; }
