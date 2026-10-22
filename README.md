@@ -28,6 +28,8 @@ Everything about the store lives in two files you can edit on GitHub, from a com
 4. Click **Commit changes**, then **Commit changes** again.
 5. Wait about a minute and reload [lvnary.com/merch](https://lvnary.com/merch/).
 
+**Giving a band member access:** each person needs their own GitHub account. The repo owner goes to the repo's **Settings → Collaborators → Add people** and invites them. Once they accept, they can edit these files the same way.
+
 **If something breaks:** GitHub checks the files after every commit. A green check ✔ next to your commit means it's fine. A red ✖ means there's a mistake: click the ✖, then **Details**, and it tells you what to fix in plain words (for example "Product 1: stock must be a whole number"). Until it's fixed, the store page says "The store is being updated" and nobody can check out, so nothing can go wrong with orders.
 
 The most common mistake is punctuation. Every line in a list ends with a comma **except the last one**, and words need "straight quotes" around them.
@@ -208,7 +210,7 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 
 1. In `merch/settings.json`, set `"checkout_api": "https://shop-api.lvnary.com"` and fill in your `pay_apps` handles.
 2. In `merch/products.json`, set the real stock for every size, and check the prices.
-3. Fill in the returns policy in `terms/index.html` (search for `[TODO: returns policy]`).
+3. Replace `[TODO: publish date]` on the five legal pages (`privacy`, `terms`, `cookies`, `accessibility`, `do-not-sell`) with the launch date, for example `October 21, 2026`.
 4. Commit everything to `main`.
 
 ### 7. Test the whole thing in test mode
@@ -222,6 +224,17 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 7. **Put the stock back** in `products.json` for the test orders.
 
 ---
+
+### 8. Mailing list (Kit)
+
+The signup form on the home page sends to [Kit](https://kit.com) (free up to 10,000 subscribers). Until it's connected, the form says "Signup opens soon."
+
+1. Sign up at [kit.com](https://kit.com) with the band email.
+2. **Grow → Landing Pages & Forms → Create new → Form → Inline**, pick any template, and save it. The look doesn't matter; the site uses its own form.
+3. In the form's **Settings → Incentive**, turn on **Send incentive email**. That's double opt-in: people confirm by email before they're added.
+4. Copy the form's number from the address bar (`app.kit.com/forms/1234567/edit` → `1234567`).
+5. In `index.html`, search for `[TODO: mailing list provider form URL]` and replace the form's `action` with `https://app.kit.com/forms/1234567/subscriptions` (your number). Commit.
+6. Sign up on lvnary.com with your own address and check the confirmation email arrives.
 
 ## Switching from test mode to live
 

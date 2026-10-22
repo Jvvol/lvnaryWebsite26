@@ -32,9 +32,9 @@
   },
   "free_shipping": { "enabled": false, "minimum_order": 75, "zones": ["US"] },
   "pay_apps": {
-    "venmo": "",
-    "cash_app": "",
-    "zelle": ""
+    "venmo": "@jvvol",
+    "cash_app": "$jvvol",
+    "zelle": "(304) 280-2750"
   },
   "checkout_api": "https://shop-api.lvnary.com"
 }

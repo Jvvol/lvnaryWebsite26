@@ -34,6 +34,14 @@ for (const path of LEGAL_PAGES) {
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('main')).toContainText('Effective date:');
   });
+
+  // The publish date is filled in at launch; every other placeholder must be gone.
+  test(`legal page lists the band email and has no placeholders: ${path}`, async ({ page }) => {
+    await page.goto(path);
+    const main = page.locator('main');
+    await expect(main.getByRole('link', { name: 'wearelvnary@gmail.com' }).first()).toHaveAttribute('href', 'mailto:wearelvnary@gmail.com');
+    expect((await main.innerText()).replace('[TODO: publish date]', '')).not.toContain('[TODO');
+  });
 }
 
 async function h2s(page) {

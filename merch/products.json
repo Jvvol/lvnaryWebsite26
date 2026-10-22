@@ -21,13 +21,13 @@
         { "src": "/images/merch/death-metal-tee.jpg", "width": 900, "height": 1200, "alt": "Black t-shirt with the LVNARY logo in jagged white death metal lettering over a purple star and circle" }
       ],
       "variants": [
-        { "size": "S", "stock": 0 },
-        { "size": "M", "stock": 0 },
-        { "size": "L", "stock": 0 },
-        { "size": "XL", "stock": 0 },
-        { "size": "2XL", "stock": 0, "extra": 0 },
-        { "size": "3XL", "stock": 0, "extra": 0 },
-        { "size": "4XL", "stock": 0, "extra": 0 }
+        { "size": "S", "stock": 4 },
+        { "size": "M", "stock": 10 },
+        { "size": "L", "stock": 12 },
+        { "size": "XL", "stock": 6 },
+        { "size": "2XL", "stock": 5, "extra": 2 },
+        { "size": "3XL", "stock": 5, "extra": 3 },
+        { "size": "4XL", "stock": 4, "extra": 3 }
       ]
     },
     {
@@ -41,7 +41,7 @@
         { "src": "/images/merch/death-metal-sticker.jpg", "width": 900, "height": 900, "alt": "Round black sticker with the LVNARY logo in jagged white death metal lettering over a purple star" }
       ],
       "variants": [
-        { "size": "One size", "stock": 0 }
+        { "size": "One size", "stock": 20 }
       ]
     },
     {
@@ -55,7 +55,7 @@
         { "src": "/images/merch/logo-sticker.jpg", "width": 900, "height": 900, "alt": "Round deep purple sticker with LVNARY in clean white capitals over a faint star outline" }
       ],
       "variants": [
-        { "size": "One size", "stock": 0 }
+        { "size": "One size", "stock": 25 }
       ]
     }
   ]
