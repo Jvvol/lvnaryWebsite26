@@ -1,7 +1,8 @@
 const { test, expect } = require('@playwright/test');
 const { externalRequests } = require('./helpers');
 
-const PROVIDER = 'https://example.invalid/subscribe';
+// The real worker address: the page's security policy only allows that one. Tests intercept it.
+const PROVIDER = 'https://shop-api.lvnary.com/subscribe';
 const CORS = { 'Access-Control-Allow-Origin': '*' };
 
 const form = page => page.locator('#signup');
@@ -17,11 +18,6 @@ async function expectFieldError(page, field, message) {
   const ids = describedBy.split(/\s+/);
   const texts = await Promise.all(ids.map(id => page.locator(`#${id}`).textContent()));
   expect(texts.join(' ')).toContain(message);
-}
-
-// Points the form at a fake worker so tests never reach the real one.
-async function useProvider(page) {
-  await form(page).evaluate((f, url) => { f.action = url; }, PROVIDER);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -64,7 +60,6 @@ test('successful signup shows loading then confirmation', async ({ page }) => {
     await held;
     route.fulfill({ status: 200, headers: CORS, contentType: 'application/json', body: '{"status":"success"}' });
   });
-  await useProvider(page);
   await email(page).fill('fan@example.com');
   await consent(page).check();
   await submit(page).click();
@@ -83,7 +78,6 @@ test('problems the worker finds show on the field', async ({ page }) => {
     contentType: 'application/json',
     body: JSON.stringify({ fieldErrors: { email: 'Enter an email address like name@example.com.' } }),
   }));
-  await useProvider(page);
   await email(page).fill('fan@example.c');
   await consent(page).check();
   await submit(page).click();
@@ -93,7 +87,6 @@ test('problems the worker finds show on the field', async ({ page }) => {
 
 test('provider error lets you retry', async ({ page }) => {
   await page.route(PROVIDER, route => route.fulfill({ status: route.request().method() === 'OPTIONS' ? 204 : 500, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' }));
-  await useProvider(page);
   await email(page).fill('fan@example.com');
   await consent(page).check();
   await submit(page).click();
@@ -105,7 +98,6 @@ test('provider error lets you retry', async ({ page }) => {
 test('network failure shows a retry message and stays on the page', async ({ page }) => {
   let posts = 0;
   await page.route(PROVIDER, route => { posts++; route.abort('internetdisconnected'); });
-  await useProvider(page);
   await email(page).fill('fan@example.com');
   await consent(page).check();
   await submit(page).click();

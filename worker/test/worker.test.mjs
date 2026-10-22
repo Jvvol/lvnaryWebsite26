@@ -16,7 +16,22 @@ const env = () => ({
   STRIPE_SECRET_KEY: 'sk_test_x',
   STRIPE_WEBHOOK_SECRET: 'whsec_test',
   STORE_KV: kv,
+  CHECKOUT_LIMITER: fakeLimiter('checkout', 10),
+  SIGNUP_LIMITER: fakeLimiter('signup', 3),
 });
+
+// Stands in for Cloudflare's rate limiter: allows `limit` calls per key in each test.
+const limiterCounts = new Map();
+function fakeLimiter(name, limit) {
+  return {
+    limit: async ({ key }) => {
+      const k = `${name}:${key}`;
+      const n = (limiterCounts.get(k) || 0) + 1;
+      limiterCounts.set(k, n);
+      return { success: n <= limit };
+    },
+  };
+}
 
 let files, commits, stripeCalls, emails, kv, realFetch;
 
@@ -33,6 +48,7 @@ beforeEach(() => {
   stripeCalls = [];
   emails = [];
   kv = memoryKV();
+  limiterCounts.clear();
   realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init = {}) => {
     const u = new URL(url);
@@ -203,9 +219,10 @@ test('a signup is saved with the date and what the person agreed to', async () =
   assert.equal(saved.email, 'fan@example.com');
   assert.match(saved.signed_up, /^\d{4}-\d{2}-\d{2}T/);
   assert.match(saved.consent, /16 or older/);
-  // Signing up again is fine and keeps one entry.
+  // Signing up again is fine, keeps one entry, and keeps the first signup date.
   assert.equal((await handle(post('/subscribe', { email: 'fan@example.com', consent: true }), env(), deps)).status, 200);
   assert.equal([...kv.map.keys()].filter(k => k.startsWith('sub:')).length, 1);
+  assert.equal(kv.meta.get('sub:fan@example.com').signed_up, saved.signed_up);
 });
 
 test('signups need a real address and the consent box', async () => {
@@ -220,8 +237,32 @@ test('signups need a real address and the consent box', async () => {
 test('signup bots and floods are turned away', async () => {
   assert.equal((await handle(post('/subscribe', { email: 'bot@example.com', consent: true, website: 'spam.example' }), env(), deps)).status, 400);
   assert.equal(kv.meta.get('sub:bot@example.com'), undefined);
-  for (let i = 0; i < 5; i++) assert.equal((await handle(post('/subscribe', { email: `fan${i}@example.com`, consent: true }), env(), deps)).status, 200);
+  // Trap-field bots are turned away before the limiter; real signups get 3 a minute.
+  for (let i = 0; i < 3; i++) assert.equal((await handle(post('/subscribe', { email: `fan${i}@example.com`, consent: true }), env(), deps)).status, 200);
   assert.equal((await handle(post('/subscribe', { email: 'fan9@example.com', consent: true }), env(), deps)).status, 429);
+  assert.equal(kv.meta.get('sub:fan9@example.com'), undefined);
+});
+
+test('checkout floods are turned away before reaching GitHub or Stripe', async () => {
+  const bag = { zone: 'US', cart: [{ id: 'death-metal-tee', size: 'M', qty: 1 }] };
+  for (let i = 0; i < 10; i++) assert.equal((await handle(post('/checkout', bag), env(), deps)).status, 200);
+  const calls = stripeCalls.length;
+  assert.equal((await handle(post('/checkout', bag), env(), deps)).status, 429);
+  assert.equal(stripeCalls.length, calls);
+});
+
+test('checkouts can reuse a recent read of the store files', async () => {
+  const bag = { zone: 'US', cart: [{ id: 'death-metal-tee', size: 'M', qty: 1 }] };
+  let reads = 0;
+  const inner = globalThis.fetch;
+  globalThis.fetch = (url, init) => {
+    if (String(url).includes('api.github.com') && !(init && init.method)) reads++;
+    return inner(url, init);
+  };
+  const e = { ...env(), GITHUB_REPO: 'band/cache-test', STORE_CACHE_SECONDS: '15' };
+  await handle(post('/checkout', bag), e, deps);
+  await handle(post('/checkout', bag), e, deps);
+  assert.equal(reads, 2); // products and settings, read once
 });
 
 test('other sites cannot call the worker from a browser', async () => {

@@ -17,3 +17,13 @@ for (const path of PAGES) {
     expect(res.status()).toBe(200);
   });
 }
+
+for (const path of PAGES) {
+  test(`has a security policy and nothing on the page breaks it: ${path}`, async ({ page }) => {
+    const violations = [];
+    page.on('console', msg => { if (/Content Security Policy/i.test(msg.text())) violations.push(msg.text()); });
+    await page.goto(path, { waitUntil: 'networkidle' });
+    await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveCount(1);
+    expect(violations).toEqual([]);
+  });
+}

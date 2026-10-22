@@ -31,7 +31,8 @@
 /* ── PRODUCTS ──
    The first product is the centerpiece: a big photo beside its details. The rest pair up below it. */
 .products { display: grid; gap: var(--space-7); }
-.products[aria-busy="true"] { min-height: 40vh; }
+/* Hold a full screen while products load, so the footer never shows and then jumps away. */
+.products[aria-busy="true"] { min-height: 100svh; }
 
 .product { display: grid; gap: var(--space-5); align-content: start; min-width: 0; }
 .product-info { min-width: 0; }

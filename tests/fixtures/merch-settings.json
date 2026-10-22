@@ -63,5 +63,5 @@
     "cash_app": "$lvnarytest",
     "zelle": ""
   },
-  "checkout_api": "https://shop-api.example.test"
+  "checkout_api": "https://shop-api.lvnary.com"
 }

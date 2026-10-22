@@ -35,9 +35,18 @@ async function readFile(env, path) {
   return { text: decodeBase64Utf8(body.content), sha: body.sha };
 }
 
-export async function loadStore(env) {
+// Per-isolate copy of the store files, so a burst of checkouts doesn't spend the token's
+// GitHub API budget (5,000 requests an hour) re-reading the same two files.
+let cached = null;
+
+export async function loadStore(env, { maxAgeSeconds = 0 } = {}) {
+  if (maxAgeSeconds > 0 && cached && cached.repo === env.GITHUB_REPO && Date.now() - cached.at < maxAgeSeconds * 1000) {
+    return structuredClone(cached.store);
+  }
   const [products, settings] = await Promise.all([readFile(env, PRODUCTS_PATH), readFile(env, SETTINGS_PATH)]);
-  return { productsFile: JSON.parse(products.text), settings: JSON.parse(settings.text) };
+  const store = { productsFile: JSON.parse(products.text), settings: JSON.parse(settings.text) };
+  if (maxAgeSeconds > 0) cached = { repo: env.GITHUB_REPO, at: Date.now(), store: structuredClone(store) };
+  return store;
 }
 
 // Changes one stock number in the file text, keeping the band's formatting and notes intact.

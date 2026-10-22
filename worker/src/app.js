@@ -12,7 +12,6 @@ import { ZONE_COUNTRIES } from './countries.js';
 
 const APP_NAMES = { venmo: 'Venmo', cash_app: 'Cash App', zelle: 'Zelle' };
 const P2P_ORDERS_PER_HOUR = 5;
-const SIGNUPS_PER_HOUR = 5;
 // Saved with each signup, so the list records exactly what each person agreed to.
 export const SIGNUP_CONSENT = "I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.";
 const DAY = 86400;
@@ -34,6 +33,15 @@ export function orderNumber() {
   return `LV-${[...bytes].map(b => alphabet[b % alphabet.length]).join('')}`;
 }
 
+// Cloudflare's rate limiter (wrangler.toml [[ratelimits]]) counts in memory, so floods
+// don't spend the KV free tier's 1,000 daily writes. No binding (local dev) means no limit.
+async function overLimit(env, binding, request) {
+  const limiter = env[binding];
+  if (!limiter) return false;
+  const { success } = await limiter.limit({ key: request.headers.get('CF-Connecting-IP') || 'unknown' });
+  return !success;
+}
+
 async function readJson(request) {
   try { return await request.json(); } catch { return null; }
 }
@@ -44,7 +52,8 @@ function cleanCart(cart) {
 }
 
 async function loadCheckedStore(env) {
-  const { productsFile, settings } = await loadStore(env);
+  // Quotes may use a few-seconds-old copy; stock changes always re-read GitHub fresh.
+  const { productsFile, settings } = await loadStore(env, { maxAgeSeconds: Number(env.STORE_CACHE_SECONDS) || 0 });
   const errors = checkStoreFiles(productsFile, settings);
   return { products: productsFile.products, settings, ok: errors.length === 0 };
 }
@@ -61,6 +70,7 @@ function addressBlock(name, a) {
 
 // ── Card checkout ──
 async function createCheckout(request, env, cors) {
+  if (await overLimit(env, 'CHECKOUT_LIMITER', request)) return json({ error: 'Too many checkout attempts from this connection. Wait a minute and try again.' }, 429, cors);
   const body = await readJson(request);
   if (!body) return json({ error: 'Something went wrong sending your bag. Reload the page and try again.' }, 400, cors);
   const zone = String(body.zone || '');
@@ -180,7 +190,7 @@ async function createP2POrder(request, env, cors, deps) {
 
 // ── Mailing list signup ──
 // Each address is one KV key, "sub:<email>". The details ride in the key's metadata, so
-// one key listing returns the whole list. Signing up twice just refreshes the date.
+// one key listing returns the whole list. Signing up twice keeps the first date.
 async function subscribe(request, env, cors) {
   const body = await readJson(request);
   const retry = { error: 'Something went wrong on our end. Try again in a minute.' };
@@ -192,14 +202,13 @@ async function subscribe(request, env, cors) {
   if (body.consent !== true) fieldErrors.consent = "Check the box to confirm you're 16 or older and want our emails.";
   if (Object.keys(fieldErrors).length) return json({ fieldErrors }, 422, cors);
 
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const rlKey = `rl-sub:${ip}:${Math.floor(Date.now() / 3600000)}`;
-  const count = Number(await env.STORE_KV.get(rlKey)) || 0;
-  if (count >= SIGNUPS_PER_HOUR) return json({ error: 'Too many signups from this connection. Try again in an hour.' }, 429, cors);
-  await env.STORE_KV.put(rlKey, String(count + 1), { expirationTtl: 3600 });
+  if (await overLimit(env, 'SIGNUP_LIMITER', request)) return json({ error: 'Too many signups from this connection. Wait a minute and try again.' }, 429, cors);
 
-  const metadata = { email, signed_up: new Date().toISOString(), consent: SIGNUP_CONSENT };
-  await env.STORE_KV.put(`sub:${email}`, '', { metadata });
+  // Already on the list: answer the same way, without spending a KV write.
+  const key = `sub:${email}`;
+  if (await env.STORE_KV.get(key) === null) {
+    await env.STORE_KV.put(key, '', { metadata: { email, signed_up: new Date().toISOString(), consent: SIGNUP_CONSENT } });
+  }
   return json({ ok: true }, 200, cors);
 }
 

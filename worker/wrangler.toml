@@ -19,6 +19,19 @@ GITHUB_BRANCH = "main"
 ORDER_EMAIL_FROM = "orders@lvnary.com"
 # Must be a verified destination in Cloudflare Email Routing.
 ORDER_EMAIL_TO = "wearelvnary@gmail.com"
+# Seconds a checkout may reuse its last read of the store files. Stock changes always read fresh.
+STORE_CACHE_SECONDS = "15"
+
+# Free per-connection limits that don't use KV writes. The period can only be 10 or 60 seconds.
+[[ratelimits]]
+name = "CHECKOUT_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "SIGNUP_LIMITER"
+namespace_id = "1002"
+simple = { limit = 3, period = 60 }
 
 [[kv_namespaces]]
 binding = "STORE_KV"

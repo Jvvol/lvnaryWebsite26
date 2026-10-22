@@ -5,7 +5,7 @@ const path = require('path');
 const { ORIGIN } = require('./helpers');
 
 const fixture = name => fs.readFileSync(path.join(__dirname, 'fixtures', name), 'utf8');
-const API = 'https://shop-api.example.test';
+const API = 'https://shop-api.lvnary.com';
 
 // Serves the test store (some stock, checkout on, Venmo + Cash App handles) instead of the real files.
 async function withStore(page) {

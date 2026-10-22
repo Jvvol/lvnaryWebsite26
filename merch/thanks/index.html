@@ -3,11 +3,17 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Content-Security-Policy: only this site's own files, plus the store worker. Adding an embed or
+         outside script? Add its address here too (see README, "Security"), or the browser blocks it. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://shop-api.lvnary.com; form-action 'self' https://shop-api.lvnary.com; frame-src 'none'; object-src 'none'; base-uri 'self'">
     <title>Order placed | LVNARY</title>
     <meta name="description" content="Your LVNARY merch order is placed.">
     <meta name="robots" content="noindex">
     <meta name="theme-color" content="#0A0920">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <!-- Fonts for the first screen: asked for early so text doesn't jump when they arrive. -->
+    <link rel="preload" href="/fonts/michroma-400.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
 
     <script>document.documentElement.classList.add('js');</script>
     <link rel="stylesheet" href="/css/tokens.css">
@@ -70,16 +76,6 @@
     </footer>
 
     <script src="/js/main.js"></script>
-    <script>
-      // Show the order number from the return link and empty the bag, since it's paid for.
-      (() => {
-        const order = new URLSearchParams(location.search).get('order') || '';
-        if (/^LV-[A-Z0-9]{6}$/.test(order)) {
-          document.getElementById('orderNumber').textContent = order;
-          document.getElementById('thanksOrder').hidden = false;
-        }
-        try { localStorage.removeItem('lvnary-bag'); } catch { /* storage blocked */ }
-      })();
-    </script>
+    <script src="/js/thanks.js"></script>
   </body>
 </html>
