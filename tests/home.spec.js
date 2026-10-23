@@ -75,10 +75,14 @@ test('content and footer links work without JavaScript', async ({ browser }) => 
   await context.close();
 });
 
-test('reduced motion stops animation', async ({ page }) => {
+test('reduced motion keeps fades but stops movement', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  expect(await page.locator('.hero-wordmark').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+  expect(await page.locator('.hero-wordmark').evaluate(el => getComputedStyle(el).animationName)).toBe('fade-in');
+  for (const selector of ['.hero-headline', '.ridge-near', '#music .section-title']) {
+    const { translate, scale } = await page.locator(selector).evaluate(el => getComputedStyle(el));
+    expect({ selector, translate, scale }).toEqual({ selector, translate: 'none', scale: 'none' });
+  }
   const canvas = page.locator('canvas.starfield');
   const first = await canvas.evaluate(c => c.toDataURL());
   await page.waitForTimeout(500);

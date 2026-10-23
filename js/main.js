@@ -134,6 +134,28 @@ function initHeroParallax() {
   }, { passive: true });
 }
 
+// ── SCROLL REVEAL ──
+// Tags the blocks below the hero so they fade up as they come into view, once. Tagging happens here
+// rather than in the markup, so if this script never runs nothing is left hidden.
+const REVEAL = '.section-title, .lede, .signup, .up-next, .release-head, .player, .shows-list, .section-action, .about-photo, .about-copy, .subhead, .socials-band, .booking';
+const REVEAL_GROUPS = '.platform-links, .merch-strip, .members';
+
+function initReveal(root) {
+  if (!root || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      io.unobserve(entry.target);
+    });
+  }, { rootMargin: '0px 0px -8% 0px' });
+
+  root.querySelectorAll('.section').forEach(section => {
+    section.querySelectorAll(REVEAL).forEach(el => { el.classList.add('reveal'); io.observe(el); });
+    section.querySelectorAll(REVEAL_GROUPS).forEach(el => { el.classList.add('reveal-group'); io.observe(el); });
+  });
+}
+
 // ── SHOWS ──
 // Shows are authored in index.html as .show-row elements with data attributes.
 function renderShows(listEl) {
@@ -331,6 +353,10 @@ function initPlayer(box) {
       allow: 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture',
     });
     frame.className = 'player-frame';
+    // Fade in once Spotify has drawn. The timer covers a load event that never comes (blocked or offline).
+    const ready = () => frame.classList.add('is-ready');
+    frame.addEventListener('load', ready, { once: true });
+    setTimeout(ready, 3000);
     box.classList.add('is-loaded');
     box.replaceChildren(frame);
     frame.focus();
@@ -368,6 +394,7 @@ function initYear() {
 initNav();
 initStarfield(document.querySelector('.starfield'));
 initHeroParallax();
+initReveal(document.getElementById('main'));
 renderShows(document.getElementById('showsList'));
 renderMerchStrip(document.getElementById('merchStrip'));
 initSignup(document.getElementById('signup'));

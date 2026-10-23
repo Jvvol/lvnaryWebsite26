@@ -151,11 +151,15 @@ test('banner and settings dialog have no WCAG 2.1 AA violations', async ({ page 
   const scan = async () => (await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze())
     .violations.map(v => `${v.id}: ${v.help}`);
+  // Both fade in; mid-fade the text is part-transparent and would fail contrast, so wait for it to settle.
+  const settled = locator => locator.evaluate(el => Promise.all(el.getAnimations({ subtree: true }).map(a => a.finished)));
   await page.goto(FIXTURE);
   await expect(banner(page)).toBeVisible();
+  await settled(banner(page));
   expect(await scan()).toEqual([]);
   await page.getByRole('button', { name: 'Customize' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  await settled(page.getByRole('dialog'));
   expect(await scan()).toEqual([]);
 });
 

@@ -113,6 +113,8 @@
   --dur-fast: 150ms;
   --dur-med: 300ms;
   --dur-slow: 900ms;
+  --dur-reveal: 700ms; /* scroll reveals and the hero entrance: seen once, so they can take their time */
+  --stagger: 70ms;
   --ease-out: cubic-bezier(.23, 1, .32, 1);
   --ease-in-out: cubic-bezier(.77, 0, .175, 1);
 

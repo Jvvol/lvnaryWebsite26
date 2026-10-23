@@ -83,9 +83,10 @@ main:focus { outline: none; }
   transition: background-color var(--dur-fast) var(--ease-out),
               border-color var(--dur-fast) var(--ease-out),
               color var(--dur-fast) var(--ease-out),
-              transform var(--dur-fast) var(--ease-out);
+              scale var(--dur-fast) var(--ease-out);
 }
-.btn:active { transform: translateY(1px); }
+/* Every pressable thing answers the press the same way: a slight give, never a jump. */
+.btn:active { scale: 0.97; }
 .btn[disabled] { opacity: 0.6; cursor: progress; }
 
 /* Ground-colored text on the accent: 5.1:1 at rest, 6.8:1 on hover. */
@@ -267,13 +268,51 @@ body:has(.hero) .site-header:not(.scrolled) .brand { opacity: 0; visibility: hid
 .ridge-mid  { fill: var(--c-surface);   animation-delay: 200ms; }
 .ridge-near { fill: var(--c-ground);    animation-delay: 300ms; }
 
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+/* `from` only, so each element settles on its own resting opacity (the starfield rests at 0.7). */
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes rise-in { from { opacity: 0; translate: 0 1rem; } }
+/* The name comes into focus, like the moon through cloud. */
+@keyframes focus-in { from { opacity: 0; filter: blur(12px); scale: 0.98; } }
 /* Rise uses `translate` so it composes with the scroll parallax on `transform`. */
 @keyframes ridge-rise {
   from { translate: 0 40%; }
   to   { translate: 0 0; }
 }
-.hero-wordmark { animation: fade-in 700ms var(--ease-out) both; }
+
+/* Entrance, once per visit: sky, name, then the news line by line. Nothing waits on it; the buttons
+   work the moment they're on screen. */
+.starfield { animation: fade-in 1600ms var(--ease-out) both; }
+.hero-wordmark { animation: focus-in 1100ms var(--ease-out) both; }
+.hero-tagline { animation: rise-in var(--dur-reveal) var(--ease-out) 250ms both; }
+.hero-news > * { animation: rise-in var(--dur-reveal) var(--ease-out) both; }
+.hero-news > :nth-child(1) { animation-delay: 400ms; }
+.hero-news > :nth-child(2) { animation-delay: calc(400ms + var(--stagger)); }
+.hero-news > :nth-child(3) { animation-delay: calc(400ms + 2 * var(--stagger)); }
+.hero-news > :nth-child(4) { animation-delay: calc(400ms + 3 * var(--stagger)); }
+
+/* ── SCROLL REVEAL ──
+   main.js tags blocks below the hero with .reveal (or .reveal-group, whose children step in one
+   after another) and adds .is-in as each comes into view. Without JavaScript nothing is tagged,
+   so nothing is ever hidden. */
+.reveal,
+.reveal-group > * {
+  opacity: 0;
+  translate: 0 1.5rem;
+  transition: opacity var(--dur-reveal) var(--ease-out), translate var(--dur-reveal) var(--ease-out);
+}
+.reveal.is-in,
+.reveal-group.is-in > * { opacity: 1; translate: none; }
+.reveal-group > :nth-child(2) { transition-delay: var(--stagger); }
+.reveal-group > :nth-child(3) { transition-delay: calc(2 * var(--stagger)); }
+.reveal-group > :nth-child(n + 4) { transition-delay: calc(3 * var(--stagger)); }
+/* Children that arrive after the group is in view (the merch tiles load from a file) still step in. */
+@starting-style {
+  .reveal-group.is-in > * { opacity: 0; translate: 0 1.5rem; }
+}
+@media print {
+  .reveal,
+  .reveal-group > * { opacity: 1; translate: none; }
+}
 
 /* ── SECTIONS ──
    One centered axis for the whole page. Headings and short copy sit on it; content blocks are
@@ -381,6 +420,14 @@ body:has(.hero) .site-header:not(.scrolled) .brand { opacity: 0; visibility: hid
 .field-check .field-error { grid-column: 2; }
 
 .field-error { color: var(--c-danger); font-size: var(--step--1); font-weight: 600; }
+
+/* Messages ease in instead of popping, so the eye catches them without a jolt. */
+.field-error,
+.signup-status { transition: opacity var(--dur-med) var(--ease-out), translate var(--dur-med) var(--ease-out); }
+@starting-style {
+  .field-error,
+  .signup-status { opacity: 0; translate: 0 -0.25rem; }
+}
 .field-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .signup-privacy { color: var(--c-muted); font-size: var(--step--1); }
 .signup-privacy a { display: inline-flex; align-items: center; min-height: 44px; }
@@ -436,7 +483,7 @@ html:not(.js) [data-open-consent] { display: none; }
   height: 5rem;
   border-radius: 50%;
   background: var(--c-accent);
-  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  transition: scale var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
 .player-icon::before {
   content: '';
@@ -445,10 +492,12 @@ html:not(.js) [data-open-consent] { display: none; }
   border-left: 1.4rem solid var(--c-ground);
 }
 .player-load:hover .player-icon { background: var(--c-accent-hi); }
-.player-load:active .player-icon { transform: scale(0.96); }
+.player-load:active .player-icon { scale: 0.94; }
 .player-label { margin-top: var(--space-2); font-size: var(--step-1); font-weight: 600; }
 .player-note { color: var(--c-muted); font-size: var(--step--1); }
-.player-frame { display: block; width: 100%; height: 100%; border: 0; }
+.player-frame { display: block; width: 100%; height: 100%; border: 0; transition: opacity 400ms var(--ease-out); }
+/* Held back until Spotify has drawn, so the box goes straight from our panel to the player, no white flash. */
+.player-frame:not(.is-ready) { opacity: 0; }
 
 .platform-links {
   display: flex;
@@ -467,10 +516,10 @@ html:not(.js) [data-open-consent] { display: none; }
   background: var(--c-surface);
   font-weight: 600;
   text-decoration: none;
-  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
 }
 .platform-link:hover { color: var(--c-ink); background: var(--c-surface-2); }
-.platform-link:active { transform: translateY(1px); }
+.platform-link:active { scale: 0.97; }
 
 /* ── SHOWS ── filled rows, a tone up from the ground; no rules. */
 .shows-list { display: grid; gap: var(--space-2); max-width: 48rem; margin: 0 auto; }
@@ -524,9 +573,14 @@ html:not(.js) [data-open-consent] { display: none; }
   aspect-ratio: 1;
   height: auto;
   object-fit: cover;
-  transition: transform var(--dur-med) var(--ease-out);
+  transition: scale var(--dur-med) var(--ease-out);
 }
-.merch-tile:hover img { transform: scale(1.03); }
+/* Only a real pointer gets the zoom; on touch it would stick after the tap. */
+@media (hover: hover) and (pointer: fine) {
+  .merch-tile:hover img { scale: 1.03; }
+}
+.merch-tile-photo { transition: scale var(--dur-fast) var(--ease-out); }
+.merch-tile:active .merch-tile-photo { scale: 0.98; }
 .merch-tile-name { font-weight: 600; line-height: 1.35; text-wrap: balance; }
 .merch-tile:hover .merch-tile-name { text-decoration: underline; color: var(--c-ink); }
 .merch-tile-note { margin-top: calc(-1 * var(--space-2)); color: var(--c-muted); font-size: var(--step--1); }
@@ -574,10 +628,10 @@ html:not(.js) [data-open-consent] { display: none; }
   place-items: center;
   width: 44px;
   height: 44px;
-  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out), scale var(--dur-fast) var(--ease-out);
 }
 .socials a:hover { background: var(--c-surface-2); }
-.socials a:active { transform: scale(0.94); }
+.socials a:active { scale: 0.94; }
 .socials img { width: 22px; height: 22px; filter: invert(1); opacity: 0.9; }
 .socials a:hover img { opacity: 1; }
 .socials-band a,
@@ -671,6 +725,11 @@ div.footer-wordmark::before { content: 'LVNARY'; }
   border: 1px solid var(--c-border-hi);
   border-radius: var(--radius-md);
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  transition: opacity 400ms var(--ease-out), translate 400ms var(--ease-out);
+}
+/* The banner rises from the edge it sits on, so it reads as arriving rather than appearing. */
+@starting-style {
+  .consent-banner { opacity: 0; translate: 0 1.5rem; }
 }
 .consent-text { max-width: var(--measure); }
 
@@ -707,6 +766,13 @@ div.footer-wordmark::before { content: 'LVNARY'; }
   border-radius: var(--radius-md);
 }
 .consent-dialog::backdrop { background: rgba(10, 9, 12, 0.78); }
+/* A modal isn't anchored to its trigger, so it grows from its own center. */
+.consent-dialog[open],
+.consent-dialog[open]::backdrop { transition: opacity 220ms var(--ease-out), scale 220ms var(--ease-out); }
+@starting-style {
+  .consent-dialog[open] { opacity: 0; scale: 0.96; }
+  .consent-dialog[open]::backdrop { opacity: 0; }
+}
 
 .consent-head {
   display: flex;
@@ -796,14 +862,23 @@ div.footer-wordmark::before { content: 'LVNARY'; }
     padding: var(--space-2) var(--gutter) var(--space-6);
     background: var(--c-ground);
     text-align: center;
+    /* Drops from the header it hangs off. Closing is quicker than opening: the visitor has
+       already chosen, so get out of the way. */
+    opacity: 0;
+    translate: 0 -0.5rem;
+    transition: opacity var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out),
+                display var(--dur-fast) allow-discrete;
   }
-  .js .nav-links.open { display: flex; }
+  .js .nav-links.open { display: flex; opacity: 1; translate: none; transition-duration: 220ms; }
+  @starting-style {
+    .js .nav-links.open { opacity: 0; translate: 0 -0.5rem; }
+  }
   .js .nav-links a { font-size: var(--step-1); min-height: 56px; }
   .js .nav-cta { width: min(100%, 22rem); margin-top: var(--space-3); }
   .js .nav-cta .btn { width: 100%; }
   .site-header:has(.nav-links.open) { background: var(--c-ground); }
   /* With the menu open, the brand shows even over the hero. */
-  .site-header:has(.nav-links.open) .brand { opacity: 1; visibility: visible; }
+  body .site-header:has(.nav-links.open) .brand { opacity: 1; visibility: visible; } /* `body` matches the hiding rule's weight */
 
   /* Without JS the links stay visible and wrap. */
   html:not(.js) .site-header { position: static; flex-wrap: wrap; height: auto; padding-block: var(--space-3); background: var(--c-ground); }
@@ -829,11 +904,17 @@ div.footer-wordmark::before { content: 'LVNARY'; }
   .player { height: 352px; }
 }
 
-/* ── REDUCED MOTION ── */
+/* ── REDUCED MOTION ──
+   Reduced, not removed: things still fade so nothing changes abruptly, but nothing travels, scales,
+   spins or blurs. All the motion above uses the separate translate and scale properties, so these
+   overrides catch it (important declarations outrank animations). */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
+    translate: none !important;
+    scale: none !important;
   }
+  .ridge { animation: none; }
+  .hero-wordmark { animation-name: fade-in; }
+  .nav-toggle-bar { transition: opacity var(--dur-fast); }
 }

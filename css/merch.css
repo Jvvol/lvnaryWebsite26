@@ -216,10 +216,10 @@
   background: var(--c-violet);
   border-radius: var(--radius-sm);
   box-shadow: 0 10px 30px rgba(5, 4, 18, 0.6);
-  transition: opacity var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out), visibility var(--dur-med);
+  transition: opacity var(--dur-med) var(--ease-out), translate var(--dur-med) var(--ease-out), visibility var(--dur-med);
 }
 .bag-bar:hover { background: var(--c-violet-hi); color: #fff; }
-.bag-bar.is-near { opacity: 0; visibility: hidden; transform: translateY(0.75rem); }
+.bag-bar.is-near { opacity: 0; visibility: hidden; translate: 0 0.75rem; }
 .shop:has(.bag-bar:not([hidden])) { padding-bottom: 5rem; }
 
 /* ── THANKS PAGE ── */
