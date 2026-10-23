@@ -210,7 +210,7 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 
 1. In `merch/settings.json`, set `"checkout_api": "https://shop-api.lvnary.com"` and fill in your `pay_apps` handles.
 2. In `merch/products.json`, set the real stock for every size, and check the prices.
-3. Replace `[TODO: publish date]` on the five legal pages (`privacy`, `terms`, `cookies`, `accessibility`, `do-not-sell`) with the launch date, for example `October 21, 2026`.
+3. The five legal pages (`privacy`, `terms`, `cookies`, `accessibility`, `do-not-sell`) have an effective date of October 22, 2026. When a policy changes, update both the text and the `datetime` on its `<time>` tag.
 4. Commit everything to `main`.
 
 ### 7. Test the whole thing in test mode

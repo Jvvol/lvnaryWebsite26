@@ -6,7 +6,7 @@
 // Prices and stock always come from products.json on GitHub, never from the browser.
 
 import { quote, checkStoreFiles, formatMoney, ZONES } from '../../js/store-core.js';
-import { loadStore, decrementStock } from './github.js';
+import { loadStore, decrementStock, forgetStore } from './github.js';
 import { stripeRequest, verifyWebhook } from './stripe.js';
 import { ZONE_COUNTRIES } from './countries.js';
 
@@ -55,6 +55,7 @@ async function loadCheckedStore(env) {
   // Quotes may use a few-seconds-old copy; stock changes always re-read GitHub fresh.
   const { productsFile, settings } = await loadStore(env, { maxAgeSeconds: Number(env.STORE_CACHE_SECONDS) || 0 });
   const errors = checkStoreFiles(productsFile, settings);
+  if (errors.length) forgetStore(); // don't keep serving a broken copy once the band fixes it
   return { products: productsFile.products, settings, ok: errors.length === 0 };
 }
 
@@ -204,10 +205,13 @@ async function subscribe(request, env, cors) {
 
   if (await overLimit(env, 'SIGNUP_LIMITER', request)) return json({ error: 'Too many signups from this connection. Wait a minute and try again.' }, 429, cors);
 
-  // Already on the list: answer the same way, without spending a KV write.
+  // Already on the list with today's wording: answer the same way, without spending a KV write.
+  // If the consent wording has changed since, record what they agreed to now (keeping the first date).
   const key = `sub:${email}`;
-  if (await env.STORE_KV.get(key) === null) {
-    await env.STORE_KV.put(key, '', { metadata: { email, signed_up: new Date().toISOString(), consent: SIGNUP_CONSENT } });
+  const { value, metadata } = await env.STORE_KV.getWithMetadata(key);
+  if (value === null || !metadata || metadata.consent !== SIGNUP_CONSENT) {
+    const signedUp = (metadata && metadata.signed_up) || new Date().toISOString();
+    await env.STORE_KV.put(key, '', { metadata: { email, signed_up: signedUp, consent: SIGNUP_CONSENT } });
   }
   return json({ ok: true }, 200, cors);
 }

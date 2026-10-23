@@ -38,7 +38,8 @@ let files, commits, stripeCalls, emails, kv, realFetch;
 function memoryKV() {
   const m = new Map();
   const meta = new Map();
-  return { get: async k => (m.has(k) ? m.get(k) : null), put: async (k, v, opts = {}) => { m.set(k, v); meta.set(k, opts.metadata); }, map: m, meta };
+  const get = async k => (m.has(k) ? m.get(k) : null);
+  return { get, getWithMetadata: async k => ({ value: await get(k), metadata: meta.get(k) ?? null }), put: async (k, v, opts = {}) => { m.set(k, v); meta.set(k, opts.metadata); }, map: m, meta };
 }
 
 beforeEach(() => {
@@ -225,6 +226,15 @@ test('a signup is saved with the date and what the person agreed to', async () =
   assert.equal(kv.meta.get('sub:fan@example.com').signed_up, saved.signed_up);
 });
 
+test('signing up again under new consent wording records the new wording', async () => {
+  kv.map.set('sub:fan@example.com', '');
+  kv.meta.set('sub:fan@example.com', { email: 'fan@example.com', signed_up: '2026-01-01T00:00:00.000Z', consent: 'old wording' });
+  assert.equal((await handle(post('/subscribe', { email: 'fan@example.com', consent: true }), env(), deps)).status, 200);
+  const saved = kv.meta.get('sub:fan@example.com');
+  assert.match(saved.consent, /16 or older/);
+  assert.equal(saved.signed_up, '2026-01-01T00:00:00.000Z');
+});
+
 test('signups need a real address and the consent box', async () => {
   const res = await handle(post('/subscribe', { email: 'abc', consent: false }), env(), deps);
   assert.equal(res.status, 422);
@@ -263,6 +273,20 @@ test('checkouts can reuse a recent read of the store files', async () => {
   await handle(post('/checkout', bag), e, deps);
   await handle(post('/checkout', bag), e, deps);
   assert.equal(reads, 2); // products and settings, read once
+});
+
+test('a stock change drops the cached read, so the next quote sees the new stock', async () => {
+  let reads = 0;
+  const inner = globalThis.fetch;
+  globalThis.fetch = (url, init) => {
+    if (String(url).includes('api.github.com') && !(init && init.method)) reads++;
+    return inner(url, init);
+  };
+  const e = { ...env(), GITHUB_REPO: 'band/cache-drop', STORE_CACHE_SECONDS: '15' };
+  await handle(post('/order', p2pOrder()), e, deps); // quote (2 reads), then the stock hold (1 fresh read)
+  const before = reads;
+  await handle(post('/order', p2pOrder()), e, deps);
+  assert.ok(reads - before >= 2, 'the second quote re-read the store files');
 });
 
 test('other sites cannot call the worker from a browser', async () => {

@@ -32,15 +32,18 @@ for (const path of LEGAL_PAGES) {
   test(`legal page has one h1 and an effective date: ${path}`, async ({ page }) => {
     await page.goto(path);
     await expect(page.locator('h1')).toHaveCount(1);
-    await expect(page.locator('main')).toContainText('Effective date:');
+    // A real date, and the machine-readable one says the same day.
+    const date = page.locator('.legal-date time');
+    await expect(date).toHaveText(/^[A-Z][a-z]+ \d{1,2}, \d{4}$/);
+    const [iso, shown] = await date.evaluate(t => [t.dateTime, t.textContent]);
+    expect(new Date(`${iso}T00:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })).toBe(shown);
   });
 
-  // The publish date is filled in at launch; every other placeholder must be gone.
   test(`legal page lists the band email and has no placeholders: ${path}`, async ({ page }) => {
     await page.goto(path);
     const main = page.locator('main');
     await expect(main.getByRole('link', { name: 'wearelvnary@gmail.com' }).first()).toHaveAttribute('href', 'mailto:wearelvnary@gmail.com');
-    expect((await main.innerText()).replace('[TODO: publish date]', '')).not.toContain('[TODO');
+    expect(await main.innerText()).not.toContain('[TODO');
   });
 }
 

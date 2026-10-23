@@ -26,7 +26,8 @@
 .legal-toc a { display: inline-block; padding: var(--space-1) 0; color: var(--c-muted); text-decoration: none; font-size: var(--step--1); }
 .legal-toc a:hover { color: var(--c-text); text-decoration: underline; }
 
-.prose { max-width: var(--measure); }
+/* `ch` is the width of a zero, wider than Plex's average letter: 52ch sets about 72 characters a line. */
+.prose { max-width: 52ch; }
 .prose > p:first-child { font-size: var(--step-1); color: var(--c-text); }
 .prose section { scroll-margin-top: 6rem; }
 .prose h2 {

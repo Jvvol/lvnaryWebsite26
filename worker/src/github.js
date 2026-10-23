@@ -37,15 +37,19 @@ async function readFile(env, path) {
 
 // Per-isolate copy of the store files, so a burst of checkouts doesn't spend the token's
 // GitHub API budget (5,000 requests an hour) re-reading the same two files.
+// Dropped whenever this worker changes stock, or when the copy turns out to be broken.
 let cached = null;
+const cacheKey = env => `${env.GITHUB_REPO}@${env.GITHUB_BRANCH}`;
+
+export function forgetStore() { cached = null; }
 
 export async function loadStore(env, { maxAgeSeconds = 0 } = {}) {
-  if (maxAgeSeconds > 0 && cached && cached.repo === env.GITHUB_REPO && Date.now() - cached.at < maxAgeSeconds * 1000) {
+  if (maxAgeSeconds > 0 && cached && cached.key === cacheKey(env) && Date.now() - cached.at < maxAgeSeconds * 1000) {
     return structuredClone(cached.store);
   }
   const [products, settings] = await Promise.all([readFile(env, PRODUCTS_PATH), readFile(env, SETTINGS_PATH)]);
   const store = { productsFile: JSON.parse(products.text), settings: JSON.parse(settings.text) };
-  if (maxAgeSeconds > 0) cached = { repo: env.GITHUB_REPO, at: Date.now(), store: structuredClone(store) };
+  if (maxAgeSeconds > 0) cached = { key: cacheKey(env), at: Date.now(), store: structuredClone(store) };
   return store;
 }
 
@@ -91,7 +95,7 @@ export async function decrementStock(env, items, message) {
       method: 'PUT',
       body: JSON.stringify({ message, content: encodeBase64Utf8(next), sha, branch: env.GITHUB_BRANCH }),
     });
-    if (res.ok) return short;
+    if (res.ok) { forgetStore(); return short; }
     // 409/422: someone else changed the file between our read and write. Read again and retry.
     if (res.status !== 409 && res.status !== 422) throw new Error(`GitHub write failed: ${res.status}`);
   }
