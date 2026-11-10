@@ -22,7 +22,7 @@
       ],
       "variants": [
         { "size": "S", "stock": 4 },
-        { "size": "M", "stock": 10 },
+        { "size": "M", "stock": 9 },
         { "size": "L", "stock": 12 },
         { "size": "XL", "stock": 6 },
         { "size": "2XL", "stock": 5, "extra": 2 },
