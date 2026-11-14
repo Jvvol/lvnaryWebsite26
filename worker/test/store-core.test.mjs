@@ -95,3 +95,11 @@ test('store file checks explain mistakes in plain words', () => {
   assert.match(errs, /needs alt text/);
   assert.match(errs, /free_shipping enabled must be true or false/);
 });
+
+test('sales_tax must be a true or false setting when present', () => {
+  const { productsFile, settings } = fixtureStore();
+  settings.sales_tax = { enabled: 'yes' };
+  assert.match(checkStoreFiles(productsFile, settings).join('\n'), /sales_tax enabled must be true or false/);
+  settings.sales_tax = { enabled: true };
+  assert.deepEqual(checkStoreFiles(productsFile, settings), []);
+});

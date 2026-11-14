@@ -173,6 +173,7 @@ function renderBag() {
   });
 
   $('ship-zone').value = bag.zone;
+  $('taxNote').hidden = !(settings.sales_tax && settings.sales_tax.enabled);
   $('itemsTotal').textContent = formatMoney(q.itemsCents);
   if (bag.zone) {
     $('shippingTotal').textContent = q.freeShipping ? 'Free' : formatMoney(q.shippingCents);

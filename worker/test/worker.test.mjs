@@ -282,3 +282,23 @@ test('order emails keep buyer text out of the headers', () => {
   assert.doesNotMatch(head, /^Bcc:/m);
   assert.doesNotMatch(head, /Reply-To/);
 });
+
+test('checkout asks Stripe Tax to add sales tax on top only when sales_tax is enabled', async () => {
+  const cart = [{ id: 'death-metal-tee', size: 'M', qty: 1 }];
+  await handle(post('/checkout', { zone: 'US', cart }), env(), deps);
+  const off = stripeCalls[0].params;
+  assert.equal(off.get('automatic_tax[enabled]'), null);
+  assert.equal(off.get('line_items[0][price_data][tax_behavior]'), null);
+
+  const settings = JSON.parse(files['merch/settings.json'].text);
+  settings.sales_tax = { enabled: true };
+  files['merch/settings.json'] = { text: JSON.stringify(settings), sha: 'tax1' };
+  await handle(post('/checkout', { zone: 'US', cart }), env(), deps);
+  const on = stripeCalls[1].params;
+  assert.equal(on.get('automatic_tax[enabled]'), 'true');
+  assert.equal(on.get('line_items[0][price_data][tax_behavior]'), 'exclusive');
+  assert.equal(on.get('line_items[0][price_data][product_data][tax_code]'), 'txcd_99999999');
+  assert.equal(on.get('shipping_options[0][shipping_rate_data][tax_behavior]'), 'exclusive');
+  assert.equal(on.get('shipping_options[0][shipping_rate_data][tax_code]'), 'txcd_92010001');
+  assert.equal(on.get('line_items[0][price_data][unit_amount]'), off.get('line_items[0][price_data][unit_amount]'));
+});

@@ -166,6 +166,7 @@ export function checkStoreFiles(productsFile, settings) {
       num(z[kind].each_additional, `shipping ${zone} ${kind} each_additional`);
     }
   }
+  if (settings.sales_tax !== undefined && (!settings.sales_tax || typeof settings.sales_tax.enabled !== 'boolean')) errs.push('sales_tax enabled must be true or false (no quotes).');
   const free = settings.free_shipping;
   if (!free || typeof free.enabled !== 'boolean') errs.push('free_shipping enabled must be true or false (no quotes).');
   else {

@@ -12,6 +12,9 @@ import { ZONE_COUNTRIES } from './countries.js';
 // Saved with each signup, so the list records exactly what each person agreed to.
 export const SIGNUP_CONSENT = "I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.";
 const DAY = 86400;
+// Stripe Tax product codes: general tangible goods, and shipping.
+const TAX_CODE_GOODS = 'txcd_99999999';
+const TAX_CODE_SHIPPING = 'txcd_92010001';
 
 function json(body, status, cors) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...cors } });
@@ -84,8 +87,13 @@ async function createCheckout(request, env, cors) {
   const metadata = { order, zone };
   q.lines.forEach((l, i) => { metadata[`item_${i}`] = JSON.stringify({ id: l.id, size: l.size, qty: l.qty, label: l.label, lineCents: l.lineCents }); });
 
+  // Stripe Tax picks the rate from the shipping address and adds it on top of these prices.
+  const taxOn = !!(store.settings.sales_tax && store.settings.sales_tax.enabled);
+  const taxBehavior = taxOn ? { tax_behavior: 'exclusive' } : {};
+
   const session = await stripeRequest(env, 'checkout/sessions', {
     mode: 'payment',
+    ...(taxOn ? { automatic_tax: { enabled: true } } : {}),
     client_reference_id: order,
     success_url: `${site}/merch/thanks/?order=${order}`,
     cancel_url: `${site}/merch/#bag`,
@@ -93,7 +101,7 @@ async function createCheckout(request, env, cors) {
     expires_at: Math.floor(Date.now() / 1000) + 35 * 60,
     line_items: q.lines.map(l => ({
       quantity: l.qty,
-      price_data: { currency: 'usd', unit_amount: l.unitCents, product_data: { name: l.label } },
+      price_data: { currency: 'usd', unit_amount: l.unitCents, ...taxBehavior, product_data: { name: l.label, ...(taxOn ? { tax_code: TAX_CODE_GOODS } : {}) } },
     })),
     shipping_address_collection: { allowed_countries: ZONE_COUNTRIES[zone] },
     shipping_options: [{
@@ -101,6 +109,8 @@ async function createCheckout(request, env, cors) {
         type: 'fixed_amount',
         display_name: q.freeShipping ? `Free shipping to ${store.settings.shipping[zone].label}` : `Shipping to ${store.settings.shipping[zone].label}`,
         fixed_amount: { amount: q.shippingCents, currency: 'usd' },
+        ...taxBehavior,
+        ...(taxOn ? { tax_code: TAX_CODE_SHIPPING } : {}),
       },
     }],
     metadata,
@@ -180,6 +190,7 @@ async function handleWebhook(request, env, deps) {
         'Items:',
         itemLines(items),
         `Shipping: ${formatMoney(session.total_details ? session.total_details.amount_shipping : 0)}`,
+        session.total_details && session.total_details.amount_tax ? `Sales tax: ${formatMoney(session.total_details.amount_tax)}` : '',
         `Shipping zone: ${zoneLabel}`,
         `Total paid: ${total}`,
         '',
