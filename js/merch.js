@@ -2,7 +2,7 @@
 // Renders products from /merch/products.json, keeps the bag in this browser, and hands
 // checkout to the store worker, which re-checks every price and stock count.
 
-import { quote, listedUnitCents, isAvailable, formatMoney, checkStoreFiles, findVariant } from './store-core.js';
+import { quote, listedUnitCents, isAvailable, formatMoney, checkStoreFiles, findVariant, payLink } from './store-core.js';
 
 const BAG_KEY = 'lvnary-bag';
 const LOW_STOCK = 3;
@@ -357,17 +357,44 @@ function showFieldErrors(errors) {
   return true;
 }
 
-function showPlaced({ order, totalCents, appName, handle }) {
+// A row of details the buyer needs in another app. The text stays selectable if copying is blocked.
+function copyButton(what, value, status) {
+  return el('button', { type: 'button', class: 'btn btn-ghost placed-copy', text: `Copy ${what}`, onclick: async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      status.textContent = `Copied the ${what}.`;
+    } catch {
+      status.textContent = `Couldn't copy the ${what}. Select the text on this page and copy it instead.`;
+    }
+  } });
+}
+
+function showPlaced({ order, totalCents, app, appName, handle }) {
   bag.items = [];
   saveBag();
   renderBag();
   $('bagEmpty').hidden = true;
   const placed = $('placed');
+  const status = el('p', { class: 'bag-fine', role: 'status', 'aria-live': 'polite' });
+  const link = payLink(app, handle, totalCents, order);
+  const filledIn = app === 'venmo' ? 'The amount and order number are filled in.' : 'The amount is filled in.';
+  const copies = [copyButton('order number', order, status)];
+  if (!link) {
+    // Banks accept a bare phone number more reliably than the formatted one shown on the page.
+    copies.unshift(copyButton(`${appName} ${handle.includes('@') ? 'email' : 'number'}`, handle.includes('@') ? handle : handle.replace(/\D/g, ''), status));
+    copies.push(copyButton('amount', (totalCents / 100).toFixed(2), status));
+  }
   placed.replaceChildren(
     el('h3', { class: 'placed-title', text: `Order ${order} is in` }),
     el('p', {}, `Send `, el('strong', { text: formatMoney(totalCents) }), ` on ${appName} to `, el('strong', { class: 'placed-handle', text: handle }), '.'),
+    link
+      ? el('a', { class: 'btn btn-primary placed-open', href: link, target: '_blank', rel: 'noopener noreferrer' }, `Open ${appName}`, el('span', { class: 'visually-hidden', text: ' (opens in new tab)' }))
+      : el('p', { text: `${appName} doesn't have a payment link. Open your bank's app, choose ${appName}, and send to the details above.` }),
+    link ? el('p', { class: 'bag-fine', text: `${filledIn} Check everything before you send.` }) : '',
     el('p', {}, 'Put ', el('strong', { text: order }), ' in the payment note so we can match it to your order.'),
-    el('p', { text: 'We ship once the payment arrives and email you if anything changes. Unpaid orders are cancelled after 3 days.' }),
+    el('div', { class: 'placed-copies' }, copies),
+    status,
+    el('p', { text: 'We ship within 30 days of receiving your payment and email you if anything changes. Unpaid orders are cancelled after 3 days.' }),
     el('p', { class: 'bag-fine', text: 'Take a screenshot of this page to keep your order number.' }),
   );
   placed.hidden = false;

@@ -94,13 +94,14 @@
                   <div><dt>Shipping</dt><dd id="shippingTotal">Choose where to ship</dd></div>
                   <div class="totals-grand"><dt>Total</dt><dd id="grandTotal">$0.00</dd></div>
                 </dl>
-                <p class="bag-fine">Prices include card processing. US dollars.</p>
+                <p class="bag-fine">Prices and shipping include card processing, however you pay. US dollars. Ships within 30 days of payment.</p>
               </div>
 
               <div class="pay">
                 <button type="button" class="btn btn-primary" id="payCard">Pay by card</button>
                 <p class="pay-note">Card, Apple Pay, or Google Pay on Stripe's secure checkout page.</p>
                 <button type="button" class="btn btn-ghost" id="payApp" aria-expanded="false" aria-controls="appOrder" hidden></button>
+                <p class="pay-note">By ordering, you agree to our <a href="/terms/#third-party-links-and-purchases">Terms and returns</a> and <a href="/privacy/">Privacy Policy</a>.</p>
                 <p class="bag-status" id="bagStatus" role="status" aria-live="polite"></p>
               </div>
             </div>
@@ -109,6 +110,7 @@
           <form class="app-order" id="appOrder" novalidate hidden>
             <h3 class="app-order-title">Your details</h3>
             <p class="app-order-intro">We'll give you an order number to put in your payment note, then ship when the payment arrives.</p>
+            <p class="app-order-intro">These apps may not offer purchase protection, and Zelle payments usually can't be reversed. Our <a href="/terms/#third-party-links-and-purchases">returns and refund terms</a> apply to your order either way.</p>
 
             <fieldset class="field field-choice" id="app-field">
               <legend>Paying with</legend>
@@ -163,6 +165,7 @@
               <input id="order-website" name="website" tabindex="-1" autocomplete="off">
             </div>
 
+            <p class="app-order-intro">By placing your order, you agree to our <a href="/terms/#third-party-links-and-purchases">Terms</a> and <a href="/privacy/">Privacy Policy</a>.</p>
             <button type="submit" class="btn btn-primary">Place order</button>
           </form>
 

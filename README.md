@@ -92,7 +92,8 @@ All in `settings.json`, with notes at the top of the file:
 
 - `shipping`: what **you pay** for postage per zone (US, Canada, everywhere else). `letter` is used when the whole order is stickers; anything with a shirt uses `parcel`. `first` is the first item, `each_additional` is every item after that. Stickers ride along free in a parcel. The site adds the card fee on top.
 - `free_shipping`: set `"enabled": true` and a `"minimum_order"` (in dollars) to ship free above that amount in the listed `zones`.
-- `pay_apps`: your Venmo, Cash App, and Zelle handles. Leave one as `""` to hide it.
+- `pay_apps`: your Venmo, Cash App, and Zelle handles. Leave one as `""` to hide it. The order confirmation turns the Venmo and Cash App handles into buttons that open the app; Zelle has no payment link, so buyers get copy buttons instead.
+- The bag, order confirmation, and Terms all promise shipping **within 30 days of payment**. To change that, update all three (`merch/index.html`, `js/merch.js`, `terms/index.html`). If you can't meet it, email the buyer and offer a full refund.
 - `card_fee`: Stripe's current fee. Check [stripe.com/pricing](https://stripe.com/pricing) once a year and update it if it changes.
 
 ---

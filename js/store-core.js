@@ -106,6 +106,17 @@ export function quote({ cart: rawCart, products, settings, zone }) {
   return { lines, itemsCents, shippingCents, totalCents: itemsCents + shippingCents, shipsAs, freeShipping, problems };
 }
 
+// A link that opens the app with what it allows filled in. Venmo takes an amount and note, Cash App
+// only an amount, and Zelle has no public payment link (null). These are the apps' public links,
+// not a payment integration: the buyer still confirms the payment in the app.
+export function payLink(app, handle, totalCents, order) {
+  const name = encodeURIComponent(String(handle).trim().replace(/^[@$]/, ''));
+  const amount = (totalCents / 100).toFixed(2);
+  if (app === 'venmo') return `https://venmo.com/${name}?txn=pay&amount=${amount}&note=${encodeURIComponent(order)}`;
+  if (app === 'cash_app') return `https://cash.app/$${name}/${amount}`;
+  return null;
+}
+
 export function formatMoney(c) {
   return `$${(c / 100).toFixed(2)}`;
 }

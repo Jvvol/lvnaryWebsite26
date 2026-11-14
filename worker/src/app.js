@@ -92,7 +92,8 @@ async function createCheckout(request, env, cors) {
     client_reference_id: order,
     success_url: `${site}/merch/thanks/?order=${order}`,
     cancel_url: `${site}/merch/#bag`,
-    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    // Stripe's minimum is 30 minutes, and a Worker's clock can lag behind real time during a request.
+    expires_at: Math.floor(Date.now() / 1000) + 35 * 60,
     line_items: q.lines.map(l => ({
       quantity: l.qty,
       price_data: { currency: 'usd', unit_amount: l.unitCents, product_data: { name: l.label } },

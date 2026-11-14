@@ -99,6 +99,14 @@ test('checkout prices come from the store file, not the browser', async () => {
   assert.deepEqual(JSON.parse(p.get('metadata[item_0]')), { id: 'death-metal-tee', size: 'M', qty: 2, label: 'Death Metal T-Shirt (Limited Edition), size M', lineCents: 4200 });
 });
 
+test('checkout sessions expire safely past Stripe\'s 30-minute minimum', async () => {
+  const before = Math.floor(Date.now() / 1000);
+  await handle(post('/checkout', { zone: 'US', cart: [{ id: 'death-metal-tee', size: 'M', qty: 1 }] }), env(), deps);
+  const expiresAt = Number(stripeCalls[0].params.get('expires_at'));
+  assert.ok(expiresAt >= before + 31 * 60, `expires_at is only ${expiresAt - before}s away`);
+  assert.ok(expiresAt <= before + 24 * 3600);
+});
+
 test('checkout refuses sold-out sizes and too-large quantities', async () => {
   const res = await handle(post('/checkout', { zone: 'US', cart: [{ id: 'death-metal-tee', size: 'S', qty: 1 }] }), env(), deps);
   assert.equal(res.status, 409);
