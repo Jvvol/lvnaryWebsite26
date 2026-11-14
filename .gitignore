@@ -5,3 +5,6 @@ playwright-report/
 .dev.vars
 subscribers.csv
 .taste-skill/
+
+# Private: Google Sheets inventory tracker and Apps Script (never publish)
+inventory-tracker/
