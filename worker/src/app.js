@@ -1,6 +1,5 @@
 // ── LVNARY checkout worker ──
 // POST /checkout        bag → Stripe Checkout page (card, Apple Pay, Google Pay)
-// POST /order           bag + address → Venmo / Cash App / Zelle order, emailed to the band
 // POST /stripe-webhook  Stripe says "paid" → lower stock, email the band
 // POST /subscribe       mailing list signup → saved in KV (export with npm run subscribers)
 // Prices and stock always come from products.json on GitHub, never from the browser.
@@ -10,8 +9,6 @@ import { loadStore, decrementStock, forgetStore } from './github.js';
 import { stripeRequest, verifyWebhook } from './stripe.js';
 import { ZONE_COUNTRIES } from './countries.js';
 
-const APP_NAMES = { venmo: 'Venmo', cash_app: 'Cash App', zelle: 'Zelle' };
-const P2P_ORDERS_PER_HOUR = 5;
 // Saved with each signup, so the list records exactly what each person agreed to.
 export const SIGNUP_CONSENT = "I'm 16 or older and agree to receive emails from LVNARY about music, shows, and merch. Unsubscribe anytime.";
 const DAY = 86400;
@@ -92,7 +89,8 @@ async function createCheckout(request, env, cors) {
     client_reference_id: order,
     success_url: `${site}/merch/thanks/?order=${order}`,
     cancel_url: `${site}/merch/#bag`,
-    expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+    // Stripe's minimum is 30 minutes, and a Worker's clock can lag behind real time during a request.
+    expires_at: Math.floor(Date.now() / 1000) + 35 * 60,
     line_items: q.lines.map(l => ({
       quantity: l.qty,
       price_data: { currency: 'usd', unit_amount: l.unitCents, product_data: { name: l.label } },
@@ -109,84 +107,6 @@ async function createCheckout(request, env, cors) {
     payment_intent_data: { metadata: { order }, description: `LVNARY merch order ${order}` },
   });
   return json({ url: session.url }, 200, cors);
-}
-
-// ── Venmo / Cash App / Zelle order ──
-function validateOrderForm(body, zone, settings) {
-  const errors = {};
-  const s = v => (typeof v === 'string' ? v.trim() : '');
-  const name = s(body.name);
-  const email = s(body.email);
-  const a = body.address || {};
-  const address = {
-    line1: s(a.line1), line2: s(a.line2), city: s(a.city), state: s(a.state), postal_code: s(a.postal_code),
-    country: zone === 'US' ? 'United States' : zone === 'CA' ? 'Canada' : s(a.country),
-  };
-  if (!name || name.length > 100) errors.name = 'Enter your full name.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) errors.email = 'Enter an email address like name@example.com.';
-  if (!address.line1 || address.line1.length > 200) errors.line1 = 'Enter your street address.';
-  if (address.line2.length > 200) errors.line2 = 'Shorten this line to 200 characters or fewer.';
-  if (!address.city || address.city.length > 100) errors.city = 'Enter your city or town.';
-  if (zone !== 'WORLD' && (!address.state || address.state.length > 100)) errors.state = zone === 'US' ? 'Enter your state.' : 'Enter your province or territory.';
-  if (zone !== 'WORLD' && (!address.postal_code || address.postal_code.length > 20)) errors.postal_code = zone === 'US' ? 'Enter your ZIP code.' : 'Enter your postal code.';
-  if (zone === 'WORLD' && (!address.country || address.country.length > 60)) errors.country = 'Enter your country.';
-  const app = s(body.app);
-  if (!APP_NAMES[app] || !s(settings.pay_apps[app])) errors.app = 'Choose how you’ll pay.';
-  return { errors, name, email, address, app };
-}
-
-async function createP2POrder(request, env, cors, deps) {
-  const body = await readJson(request);
-  if (!body) return json({ error: 'Something went wrong sending your order. Reload the page and try again.' }, 400, cors);
-  // Bots fill every field; people never see this one.
-  if (body.website) return json({ error: 'Something went wrong sending your order. Reload the page and try again.' }, 400, cors);
-
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const rlKey = `rl:${ip}:${Math.floor(Date.now() / 3600000)}`;
-  const count = Number(await env.STORE_KV.get(rlKey)) || 0;
-  if (count >= P2P_ORDERS_PER_HOUR) return json({ error: 'Too many orders from this connection. Try again in an hour, or message us on Instagram.' }, 429, cors);
-
-  const zone = String(body.zone || '');
-  const cart = cleanCart(body.cart);
-  const store = await loadCheckedStore(env);
-  if (!store.ok) return json(STORE_BUSY, 503, cors);
-
-  const form = validateOrderForm(body, zone, store.settings);
-  if (Object.keys(form.errors).length) return json({ fieldErrors: form.errors }, 422, cors);
-  const q = quote({ cart, products: store.products, settings: store.settings, zone });
-  if (q.problems.length) return json({ problems: q.problems }, 409, cors);
-
-  await env.STORE_KV.put(rlKey, String(count + 1), { expirationTtl: 3600 });
-  const order = orderNumber();
-  // Hold the items now so nobody else buys them while we wait for the payment.
-  const short = await decrementStock(env, q.lines.map(l => ({ id: l.id, size: l.size, qty: l.qty })), `Hold stock for ${APP_NAMES[form.app]} order ${order}`);
-
-  const handle = store.settings.pay_apps[form.app];
-  const total = formatMoney(q.totalCents);
-  await deps.sendEmail({
-    subject: `New ${APP_NAMES[form.app]} order ${order}: ${total}, NOT PAID YET`,
-    text: [
-      `LVNARY merch order ${order}`,
-      `Paying with ${APP_NAMES[form.app]} (${handle}). NOT PAID YET.`,
-      `Ship only after a ${APP_NAMES[form.app]} payment of ${total} arrives with "${order}" in the note.`,
-      `If it hasn't arrived in 3 days, email the buyer. If you cancel, add the items back to the stock in products.json.`,
-      short.length ? `\n!! OVERSOLD: ${short.map(s => `${s.id} ${s.size} (wanted ${s.qty}, had ${s.had})`).join('; ')}. Email the buyer before taking payment.` : '',
-      '',
-      'Ship to:',
-      addressBlock(form.name, form.address),
-      `Email: ${form.email}`,
-      '',
-      'Items:',
-      itemLines(q.lines),
-      `${q.freeShipping ? 'Free shipping' : 'Shipping'} (${store.settings.shipping[zone].label}, ${q.shipsAs}): ${formatMoney(q.shippingCents)}`,
-      `Total due: ${total}`,
-      '',
-      'Stock in products.json has already been lowered to hold these items.',
-    ].join('\n'),
-    replyTo: form.email,
-  });
-
-  return json({ order, totalCents: q.totalCents, app: form.app, appName: APP_NAMES[form.app], handle }, 200, cors);
 }
 
 // ── Mailing list signup ──
@@ -281,7 +201,6 @@ export async function handle(request, env, deps) {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (request.method === 'POST' && url.pathname === '/stripe-webhook') return await handleWebhook(request, env, deps);
     if (request.method === 'POST' && url.pathname === '/checkout') return await createCheckout(request, env, cors);
-    if (request.method === 'POST' && url.pathname === '/order') return await createP2POrder(request, env, cors, deps);
     if (request.method === 'POST' && url.pathname === '/subscribe') return await subscribe(request, env, cors);
     return json({ error: 'Not found' }, 404, cors);
   } catch (err) {

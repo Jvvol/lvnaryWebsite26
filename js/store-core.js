@@ -172,9 +172,6 @@ export function checkStoreFiles(productsFile, settings) {
     num(free.minimum_order, 'free_shipping minimum_order');
     if (!Array.isArray(free.zones) || free.zones.some(z => !ZONES.includes(z))) errs.push('free_shipping zones can only list "US", "CA", and "WORLD".');
   }
-  if (!settings.pay_apps || ['venmo', 'cash_app', 'zelle'].some(k => typeof settings.pay_apps[k] !== 'string')) {
-    errs.push('pay_apps needs venmo, cash_app, and zelle (use "" to hide one).');
-  }
   if (typeof settings.checkout_api !== 'string') errs.push('checkout_api must be in quotes (use "" to turn checkout off).');
   return errs;
 }

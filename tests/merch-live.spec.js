@@ -1,8 +1,8 @@
 const { test, expect } = require('@playwright/test');
 
-// The real store files, as published: checkout is on, every shirt size has stock, and all three pay apps show.
+// The real store files, as published: checkout is on, every shirt size has stock.
 
-test('the published store is open: sizes in stock and both ways to pay', async ({ page }) => {
+test('the published store is open: sizes in stock and card checkout', async ({ page }) => {
   await page.goto('/merch/');
   await expect(page.getByRole('heading', { level: 1, name: 'Merch' })).toBeVisible();
   await expect(page.getByRole('article')).toHaveCount(3);
@@ -16,7 +16,6 @@ test('the published store is open: sizes in stock and both ways to pay', async (
   await tee.getByRole('radio', { name: 'M', exact: true }).check();
   await tee.getByRole('button', { name: 'Add to bag' }).click();
   await expect(page.getByRole('button', { name: 'Pay by card' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Pay with Venmo, Cash App, or Zelle' })).toBeVisible();
 });
 
 test('a broken products file shows a plain notice, not a blank page', async ({ page }) => {

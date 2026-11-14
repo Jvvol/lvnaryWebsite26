@@ -11,3 +11,5 @@ exclude:
   - playwright-report
   - worker
   - README.md
+  - checkout_changes.md
+  - TODO.md

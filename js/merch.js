@@ -6,7 +6,6 @@ import { quote, listedUnitCents, isAvailable, formatMoney, checkStoreFiles, find
 
 const BAG_KEY = 'lvnary-bag';
 const LOW_STOCK = 3;
-const APP_NAMES = { venmo: 'Venmo', cash_app: 'Cash App', zelle: 'Zelle' };
 
 const $ = id => document.getElementById(id);
 let products = [];
@@ -40,13 +39,6 @@ function el(tag, attrs = {}, ...children) {
 function checkoutReady() {
   return Boolean(settings && settings.checkout_api);
 }
-function payApps() {
-  return Object.keys(APP_NAMES).filter(k => settings.pay_apps[k]);
-}
-function listAnd(words) {
-  return words.length < 3 ? words.join(' or ') : `${words.slice(0, -1).join(', ')}, or ${words.at(-1)}`;
-}
-
 // ── PRODUCTS ──
 // Big titles shouldn't break "T-Shirt" into "T-" and "Shirt", so hyphenated words stay whole.
 function nameWithoutHyphenBreaks(name) {
@@ -144,11 +136,6 @@ function renderBag() {
   const empty = bag.items.length === 0;
   $('bagEmpty').hidden = !empty;
   $('bagCheckout').hidden = empty;
-  if (empty) {
-    // The order form sits outside the checkout block, so close it with the bag.
-    $('appOrder').hidden = true;
-    $('payApp').setAttribute('aria-expanded', 'false');
-  }
   lines.replaceChildren();
 
   const q = currentQuote();
@@ -195,7 +182,6 @@ function renderBag() {
     $('grandTotal').textContent = formatMoney(q.itemsCents);
   }
   updateBagBar();
-  updateZoneFields();
 }
 
 // The bag sits below every product, so a bar jumps to it, except while the bag is already on screen.
@@ -239,11 +225,11 @@ function requireZone() {
   return false;
 }
 
-// Sends the bag to the worker. Returns the parsed reply, or null after showing an error.
+// Sends the bag to the worker's checkout endpoint. Returns the parsed reply, or null after showing an error.
 async function callWorker(path, body, button) {
   const label = button.textContent;
   button.disabled = true;
-  button.textContent = path === '/checkout' ? 'Opening checkout…' : 'Placing order…';
+  button.textContent = 'Opening checkout…';
   setStatus('');
   try {
     const res = await fetch(`${settings.checkout_api.replace(/\/$/, '')}${path}`, {
@@ -260,7 +246,6 @@ async function callWorker(path, body, button) {
       setStatus(data.problems.length === 1 ? data.problems[0].message : 'Some items in your bag changed. Check the notes in your bag, then try again.', 'error');
       return null;
     }
-    if (data.fieldErrors) return data;
     setStatus(data.error || 'Checkout is having trouble right now. Try again in a few minutes.', 'error');
     return null;
   } catch {
@@ -276,102 +261,6 @@ async function payByCard() {
   if (!requireZone()) return;
   const data = await callWorker('/checkout', { cart: bag.items, zone: bag.zone }, $('payCard'));
   if (data && data.url) window.location.assign(data.url);
-}
-
-// ── VENMO / CASH APP / ZELLE ORDER ──
-function updateZoneFields() {
-  const zone = bag.zone;
-  $('country-field').hidden = zone !== 'WORLD';
-  $('order-state-label').textContent = zone === 'CA' ? 'Province or territory' : zone === 'US' ? 'State' : 'State, province, or region (optional)';
-  $('order-postal-label').textContent = zone === 'US' ? 'ZIP code' : zone === 'CA' ? 'Postal code' : 'Postal code (optional)';
-}
-
-function initAppOrder() {
-  const apps = payApps();
-  const toggle = $('payApp');
-  const form = $('appOrder');
-  if (!apps.length) return;
-  toggle.hidden = false;
-  toggle.textContent = `Pay with ${listAnd(apps.map(a => APP_NAMES[a]))}`;
-  $('appChoices').replaceChildren(...apps.map(a => el('div', { class: 'choice' },
-    el('input', { type: 'radio', name: 'app', id: `app-${a}`, value: a, required: true, checked: apps.length === 1 }),
-    el('label', { for: `app-${a}`, text: APP_NAMES[a] }))));
-
-  toggle.addEventListener('click', () => {
-    const open = toggle.getAttribute('aria-expanded') !== 'true';
-    toggle.setAttribute('aria-expanded', String(open));
-    form.hidden = !open;
-    if (open) form.querySelector('input:not([type="hidden"])').focus();
-  });
-
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    if (!requireZone()) return;
-    const f = form.elements;
-    const fields = ['order-name', 'order-email', 'order-line1', 'order-line2', 'order-city', 'order-state', 'order-postal_code', 'order-country'].map(id => $(id));
-    fields.forEach(i => setFieldError(i, ''));
-    setAppError('');
-
-    // Quick checks here; the worker checks again and has the final say.
-    const local = {};
-    if (!f.app.value) local.app = 'Choose how you’ll pay.';
-    if (!f.name.value.trim()) local.name = 'Enter your full name.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim())) local.email = f.email.value.trim() ? 'Enter an email address like name@example.com.' : 'Enter your email address.';
-    if (!f.line1.value.trim()) local.line1 = 'Enter your street address.';
-    if (!f.city.value.trim()) local.city = 'Enter your city or town.';
-    if (bag.zone !== 'WORLD' && !f.state.value.trim()) local.state = bag.zone === 'US' ? 'Enter your state.' : 'Enter your province or territory.';
-    if (bag.zone !== 'WORLD' && !f.postal_code.value.trim()) local.postal_code = bag.zone === 'US' ? 'Enter your ZIP code.' : 'Enter your postal code.';
-    if (bag.zone === 'WORLD' && !f.country.value.trim()) local.country = 'Enter your country.';
-    if (showFieldErrors(local)) return;
-
-    const data = await callWorker('/order', {
-      cart: bag.items, zone: bag.zone, app: f.app.value, name: f.name.value, email: f.email.value, website: f.website.value,
-      address: { line1: f.line1.value, line2: f.line2.value, city: f.city.value, state: f.state.value, postal_code: f.postal_code.value, country: f.country.value },
-    }, form.querySelector('button[type="submit"]'));
-    if (!data) return;
-    if (data.fieldErrors) { showFieldErrors(data.fieldErrors); return; }
-    showPlaced(data);
-  });
-}
-
-function setAppError(message) {
-  const err = $('app-error');
-  err.textContent = message;
-  err.hidden = !message;
-  $('app-field').toggleAttribute('aria-invalid', Boolean(message));
-  if (message) $('app-field').setAttribute('aria-describedby', 'app-error');
-}
-
-function showFieldErrors(errors) {
-  const keys = Object.keys(errors);
-  if (!keys.length) return false;
-  let first = null;
-  for (const key of keys) {
-    if (key === 'app') { setAppError(errors.app); first = first || $('appChoices').querySelector('input'); continue; }
-    const input = $(`order-${key}`);
-    if (!input) continue;
-    setFieldError(input, errors[key]);
-    first = first || input;
-  }
-  if (first) first.focus();
-  return true;
-}
-
-function showPlaced({ order, totalCents, appName, handle }) {
-  bag.items = [];
-  saveBag();
-  renderBag();
-  $('bagEmpty').hidden = true;
-  const placed = $('placed');
-  placed.replaceChildren(
-    el('h3', { class: 'placed-title', text: `Order ${order} is in` }),
-    el('p', {}, `Send `, el('strong', { text: formatMoney(totalCents) }), ` on ${appName} to `, el('strong', { class: 'placed-handle', text: handle }), '.'),
-    el('p', {}, 'Put ', el('strong', { text: order }), ' in the payment note so we can match it to your order.'),
-    el('p', { text: 'We ship once the payment arrives and email you if anything changes. Unpaid orders are cancelled after 3 days.' }),
-    el('p', { class: 'bag-fine', text: 'Take a screenshot of this page to keep your order number.' }),
-  );
-  placed.hidden = false;
-  placed.focus();
 }
 
 // ── LOAD ──
@@ -429,7 +318,6 @@ async function init() {
     renderBag();
   });
   $('payCard').addEventListener('click', payByCard);
-  initAppOrder();
   renderBag();
   watchBag();
 }
