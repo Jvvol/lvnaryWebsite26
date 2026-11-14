@@ -7,7 +7,7 @@ const { ORIGIN } = require('./helpers');
 const fixture = name => fs.readFileSync(path.join(__dirname, 'fixtures', name), 'utf8');
 const API = 'https://shop-api.lvnary.com';
 
-// Serves the test store (some stock, checkout on, Venmo + Cash App handles) instead of the real files.
+// Serves the test store (some stock, checkout on) instead of the real files.
 async function withStore(page) {
   await page.route(`${ORIGIN}/merch/products.json`, r => r.fulfill({ contentType: 'application/json', body: fixture('merch-products.json') }));
   await page.route(`${ORIGIN}/merch/settings.json`, r => r.fulfill({ contentType: 'application/json', body: fixture('merch-settings.json') }));
@@ -119,100 +119,22 @@ test('checkout errors say what to do next', async ({ page }) => {
   await expect(page.locator('#bagStatus')).toHaveText("We couldn't reach checkout. Check your connection and try again.");
 });
 
-test('Venmo / Cash App order: form checks, then the order number and handle', async ({ page }) => {
-  let sent;
-  await page.route(`${API}/order`, async r => {
-    sent = r.request().postDataJSON();
-    await r.fulfill({ contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': ORIGIN }, body: JSON.stringify({ order: 'LV-XYZ789', totalCents: 712, app: 'venmo', appName: 'Venmo', handle: '@lvnary-test' }) });
-  });
-  await page.goto('/merch/');
-  await logo(page).getByLabel('Quantity').fill('2');
-  await logo(page).getByRole('button', { name: 'Add to bag' }).click();
-  await page.getByLabel('Ship to').selectOption('US');
-
-  // Zelle has no handle in the test settings, so it isn't offered.
-  const toggle = page.getByRole('button', { name: 'Pay with Venmo or Cash App' });
-  await toggle.click();
-  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await page.getByRole('button', { name: 'Place order' }).click();
-  await expect(page.getByText('Choose how you’ll pay.')).toBeVisible();
-  await expect(page.getByLabel('Full name')).toHaveAttribute('aria-invalid', 'true');
-  await expect(page.getByText('Enter your ZIP code.')).toBeVisible();
-
-  await page.getByRole('radio', { name: 'Venmo' }).check();
-  await page.getByLabel('Full name').fill('Sam Fan');
-  await page.getByLabel('Email address').fill('fan@example.com');
-  await page.getByLabel('Street address').fill('1 High St');
-  await page.getByLabel('City or town').fill('Morgantown');
-  await page.getByLabel('State').fill('WV');
-  await page.getByLabel('ZIP code').fill('26505');
-  await page.getByRole('button', { name: 'Place order' }).click();
-
-  const placed = page.locator('#placed');
-  await expect(placed.getByRole('heading', { name: 'Order LV-XYZ789 is in' })).toBeVisible();
-  await expect(placed).toBeFocused();
-  await expect(placed).toContainText('Send $7.12 on Venmo to @lvnary-test.');
-  await expect(placed).toContainText('Put LV-XYZ789 in the payment note');
-  await expect(placed.getByRole('link', { name: /Open Venmo/ })).toHaveAttribute('href', 'https://venmo.com/lvnary-test?txn=pay&amount=7.12&note=LV-XYZ789');
-  await expect(placed.getByRole('button', { name: 'Copy order number' })).toBeVisible();
-  expect(sent).toMatchObject({ app: 'venmo', zone: 'US', name: 'Sam Fan', cart: [{ id: 'logo-sticker', size: 'One size', qty: 2 }], address: { postal_code: '26505' } });
-});
-
-// Goes straight to the confirmation with the given /order reply.
-async function placeOrder(page, reply) {
-  await page.route(`${API}/order`, r => r.fulfill({ contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': ORIGIN }, body: JSON.stringify(reply) }));
-  await page.goto('/merch/');
-  await logo(page).getByRole('button', { name: 'Add to bag' }).click();
-  await page.getByLabel('Ship to').selectOption('US');
-  await page.getByRole('button', { name: /^Pay with/ }).click();
-  await page.getByRole('radio', { name: 'Venmo' }).check();
-  await page.getByLabel('Full name').fill('Sam Fan');
-  await page.getByLabel('Email address').fill('fan@example.com');
-  await page.getByLabel('Street address').fill('1 High St');
-  await page.getByLabel('City or town').fill('Morgantown');
-  await page.getByLabel('State').fill('WV');
-  await page.getByLabel('ZIP code').fill('26505');
-  await page.getByRole('button', { name: 'Place order' }).click();
-  return page.locator('#placed');
-}
-
-test('Cash App confirmation links to the app with the amount', async ({ page }) => {
-  const placed = await placeOrder(page, { order: 'LV-XYZ789', totalCents: 712, app: 'cash_app', appName: 'Cash App', handle: '$lvnarytest' });
-  await expect(placed.getByRole('link', { name: /Open Cash App/ })).toHaveAttribute('href', 'https://cash.app/$lvnarytest/7.12');
-  await expect(placed).toContainText('Put LV-XYZ789 in the payment note');
-});
-
-test('Zelle confirmation has no app link and copies the details', async ({ page, context }) => {
-  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  const placed = await placeOrder(page, { order: 'LV-XYZ789', totalCents: 712, app: 'zelle', appName: 'Zelle', handle: '(304) 280-2750' });
-  await expect(placed.getByRole('link', { name: /Open/ })).toHaveCount(0);
-  await expect(placed).toContainText("Open your bank's app");
-  await expect(placed).not.toContainText('null');
-  await placed.getByRole('button', { name: 'Copy Zelle number' }).click();
-  await expect(placed.getByRole('status')).toHaveText('Copied the Zelle number.');
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('3042802750');
-  await placed.getByRole('button', { name: 'Copy amount' }).click();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('7.12');
-});
-
 test('the bag shows the order terms before anyone pays', async ({ page }) => {
   await page.goto('/merch/');
   await logo(page).getByRole('button', { name: 'Add to bag' }).click();
-  await expect(page.locator('#bagCheckout')).toContainText('Prices and shipping include card processing');
-  await expect(page.locator('#bagCheckout')).toContainText('Ships within 30 days');
+  await expect(page.locator('#bagCheckout')).toContainText('include card processing');
+  await expect(page.locator('#bagCheckout')).toContainText('ship within 30 days');
   await expect(page.locator('#bagCheckout').getByRole('link', { name: 'Terms and returns' })).toHaveAttribute('href', '/terms/#third-party-links-and-purchases');
-  await page.getByRole('button', { name: /^Pay with/ }).click();
-  await expect(page.locator('#appOrder')).toContainText('may not offer purchase protection');
-  await expect(page.locator('#appOrder').getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy/');
+  await expect(page.locator('#bagCheckout').getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute('href', '/privacy/');
 });
 
-test('worldwide orders ask for the country', async ({ page }) => {
+test('paying by card asks where to ship first', async ({ page }) => {
   await page.goto('/merch/');
-  await logo(page).getByRole('button', { name: 'Add to bag' }).click();
+  await addTee(page);
+  await page.getByRole('button', { name: 'Pay by card' }).click();
+  await expect(page.locator('#ship-zone-error')).toHaveText('Choose where to ship your order.');
   await page.getByLabel('Ship to').selectOption('WORLD');
-  await page.getByRole('button', { name: /^Pay with/ }).click();
-  await expect(page.getByLabel('Country')).toBeVisible();
-  await expect(page.getByLabel('Postal code (optional)')).toBeVisible();
+  await expect(page.locator('#shippingTotal')).not.toHaveText('Choose where to ship');
 });
 
 test('the mobile bag bar jumps to the bag', async ({ page, isMobile }) => {
@@ -226,13 +148,11 @@ test('the mobile bag bar jumps to the bag', async ({ page, isMobile }) => {
   await expect(bag(page)).toBeInViewport();
 });
 
-test('no WCAG 2.1 AA violations with a full bag and the order form open', async ({ page }) => {
+test('no WCAG 2.1 AA violations with a full bag', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/merch/');
   await addTee(page);
   await page.getByLabel('Ship to').selectOption('US');
-  await page.getByRole('button', { name: /^Pay with/ }).click();
-  await page.getByRole('button', { name: 'Place order' }).click();
   const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
   expect(violations.map(v => `${v.id}: ${v.nodes.length} × ${v.help}`)).toEqual([]);
 });

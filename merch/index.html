@@ -63,7 +63,7 @@
         <p class="shop-intro">Shirts and stickers, packed by the band in Morgantown and shipped anywhere.</p>
       </div>
 
-      <noscript><p class="shop-notice">The store needs JavaScript to run. To order without it, message us on <a href="https://www.instagram.com/wearelvnary/">Instagram</a>.</p></noscript>
+      <noscript><p class="shop-notice">The store only works with JavaScript on. If you can't turn it on, message us on <a href="https://www.instagram.com/wearelvnary/">Instagram</a>.</p></noscript>
       <p class="shop-notice" id="shopNotice" hidden></p>
 
       <div class="shop-layout">
@@ -94,82 +94,18 @@
                   <div><dt>Shipping</dt><dd id="shippingTotal">Choose where to ship</dd></div>
                   <div class="totals-grand"><dt>Total</dt><dd id="grandTotal">$0.00</dd></div>
                 </dl>
-                <p class="bag-fine">Prices and shipping include card processing, however you pay. US dollars. Ships within 30 days of payment.</p>
+                <p class="bag-fine">Prices are in US dollars and include card processing. Orders ship within 30 days of payment.</p>
               </div>
 
               <div class="pay">
                 <button type="button" class="btn btn-primary" id="payCard">Pay by card</button>
-                <p class="pay-note">Card, Apple Pay, or Google Pay on Stripe's secure checkout page.</p>
-                <button type="button" class="btn btn-ghost" id="payApp" aria-expanded="false" aria-controls="appOrder" hidden></button>
+                <p class="pay-note">Pay with a card, Apple Pay, or Google Pay on Stripe's checkout page.</p>
                 <p class="pay-note">By ordering, you agree to our <a href="/terms/#third-party-links-and-purchases">Terms and returns</a> and <a href="/privacy/">Privacy Policy</a>.</p>
                 <p class="bag-status" id="bagStatus" role="status" aria-live="polite"></p>
               </div>
             </div>
           </div>
 
-          <form class="app-order" id="appOrder" novalidate hidden>
-            <h3 class="app-order-title">Your details</h3>
-            <p class="app-order-intro">We'll give you an order number to put in your payment note, then ship when the payment arrives.</p>
-            <p class="app-order-intro">These apps may not offer purchase protection, and Zelle payments usually can't be reversed. Our <a href="/terms/#third-party-links-and-purchases">returns and refund terms</a> apply to your order either way.</p>
-
-            <fieldset class="field field-choice" id="app-field">
-              <legend>Paying with</legend>
-              <div class="choices" id="appChoices"></div>
-              <p class="field-error" id="app-error" hidden></p>
-            </fieldset>
-
-            <div class="field">
-              <label for="order-name">Full name</label>
-              <input id="order-name" name="name" autocomplete="name" required>
-              <p class="field-error" id="order-name-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="order-email">Email address</label>
-              <input id="order-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-              <p class="field-error" id="order-email-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="order-line1">Street address</label>
-              <input id="order-line1" name="line1" autocomplete="address-line1" required>
-              <p class="field-error" id="order-line1-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="order-line2">Apartment, suite, etc. <span class="optional">(optional)</span></label>
-              <input id="order-line2" name="line2" autocomplete="address-line2">
-              <p class="field-error" id="order-line2-error" hidden></p>
-            </div>
-            <div class="field">
-              <label for="order-city">City or town</label>
-              <input id="order-city" name="city" autocomplete="address-level2" required>
-              <p class="field-error" id="order-city-error" hidden></p>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label for="order-state" id="order-state-label">State</label>
-                <input id="order-state" name="state" autocomplete="address-level1">
-                <p class="field-error" id="order-state-error" hidden></p>
-              </div>
-              <div class="field">
-                <label for="order-postal_code" id="order-postal-label">ZIP code</label>
-                <input id="order-postal_code" name="postal_code" autocomplete="postal-code">
-                <p class="field-error" id="order-postal_code-error" hidden></p>
-              </div>
-            </div>
-            <div class="field" id="country-field" hidden>
-              <label for="order-country">Country</label>
-              <input id="order-country" name="country" autocomplete="country-name">
-              <p class="field-error" id="order-country-error" hidden></p>
-            </div>
-            <div class="field-trap" aria-hidden="true">
-              <label for="order-website">Leave this empty</label>
-              <input id="order-website" name="website" tabindex="-1" autocomplete="off">
-            </div>
-
-            <p class="app-order-intro">By placing your order, you agree to our <a href="/terms/#third-party-links-and-purchases">Terms</a> and <a href="/privacy/">Privacy Policy</a>.</p>
-            <button type="submit" class="btn btn-primary">Place order</button>
-          </form>
-
-          <div class="placed" id="placed" tabindex="-1" hidden></div>
         </section>
       </div>
 

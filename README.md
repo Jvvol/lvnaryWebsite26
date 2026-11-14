@@ -18,7 +18,7 @@ Everything about the store lives in two files you can edit on GitHub, from a com
 | File | What's in it |
 |---|---|
 | [`merch/products.json`](merch/products.json) | Products, prices, sizes, and stock |
-| [`merch/settings.json`](merch/settings.json) | Shipping rates, card fee, Venmo/Cash App/Zelle handles |
+| [`merch/settings.json`](merch/settings.json) | Shipping rates, card fee, checkout address |
 
 ### Editing a file
 
@@ -44,7 +44,6 @@ Find the size and change the number after `"stock":`
 
 - `0` greys that size out and nobody can buy it.
 - Online **card** orders lower these numbers by themselves. You only change stock for things sold in person, restocks, or cancelled orders.
-- **Venmo/Cash App/Zelle orders placed on the site also lower stock right away** (to hold the items). If one gets cancelled, add the items back.
 
 ### Change a price
 
@@ -92,8 +91,7 @@ All in `settings.json`, with notes at the top of the file:
 
 - `shipping`: what **you pay** for postage per zone (US, Canada, everywhere else). `letter` is used when the whole order is stickers; anything with a shirt uses `parcel`. `first` is the first item, `each_additional` is every item after that. Stickers ride along free in a parcel. The site adds the card fee on top.
 - `free_shipping`: set `"enabled": true` and a `"minimum_order"` (in dollars) to ship free above that amount in the listed `zones`.
-- `pay_apps`: your Venmo, Cash App, and Zelle handles. Leave one as `""` to hide it. The order confirmation turns the Venmo and Cash App handles into buttons that open the app; Zelle has no payment link, so buyers get copy buttons instead.
-- The bag, order confirmation, and Terms all promise shipping **within 30 days of payment**. To change that, update all three (`merch/index.html`, `js/merch.js`, `terms/index.html`). If you can't meet it, email the buyer and offer a full refund.
+- The bag and the Terms both promise shipping **within 30 days of payment**. To change that, update both (`merch/index.html` and `terms/index.html`). If you can't meet it, email the buyer and offer a full refund.
 - `card_fee`: Stripe's current fee. Check [stripe.com/pricing](https://stripe.com/pricing) once a year and update it if it changes.
 
 ---
@@ -102,10 +100,9 @@ All in `settings.json`, with notes at the top of the file:
 
 ### When an order comes in
 
-You get an email at the band's order address for **every** order:
+You get an email at the band's order address for every order:
 
 - **"New card order LV-XXXXXX: $NN.NN, paid"**: the money is in Stripe. The email has the shipping address, items, and sizes. Pack it and ship it.
-- **"New Venmo order LV-XXXXXX: $NN.NN, NOT PAID YET"** (or Cash App or Zelle): **wait for the payment.** The buyer was told to put the order number in the payment note. Ship only once a payment for the right amount arrives with that number.
 
 You can also see every card order in the Stripe dashboard: **Payments** → click the payment → the shipping address and items are listed there. The order email has a direct link.
 
@@ -115,14 +112,9 @@ You can also see every card order in the Stripe dashboard: **Payments** → clic
 2. Mail it.
 3. Optional but appreciated: reply to the order email (it goes to the buyer) with the tracking number.
 
-### Unpaid Venmo/Cash App/Zelle orders
-
-If a payment hasn't come in after 3 days, email the buyer once. If you cancel, **add the items back to the stock** in `products.json`.
-
 ### Refunds
 
 - **Card orders:** Stripe dashboard → **Payments** → click the payment → **Refund**. Stripe keeps its original fee, so a full refund costs the band that fee.
-- **App orders:** send the money back through the same app.
 - If you're refunding because something was oversold, the email will have said **"OVERSOLD"** at the top.
 
 ### Selling at shows
@@ -138,8 +130,7 @@ Take cash, Venmo, Cash App, or Zelle in person as usual. Afterward, lower the st
 - When Stripe confirms a payment, it tells the worker. The worker lowers the stock in `products.json` (you'll see commits named "Card order LV-…: lower stock") and emails the band.
 - **Costs:** $0 a month. Stripe charges 2.9% + 30¢ per US card payment (plus 1.5% for cards from other countries); the site builds that into prices and shipping so the band keeps the take-home price plus postage. Cloudflare, GitHub, and the email forwarding are free at our size.
 - **Overselling:** stock is checked when checkout opens and again when payment arrives. If two people buy the very last shirt within the same minute, the second order email says **OVERSOLD** so you can refund it. That's the one gap a free setup can't fully close.
-- **Fees and the law:** card fees are built into prices instead of being added as a separate "card fee" line. A separate card surcharge would break Visa's 3% cap on almost every order (the 30¢ fixed fee alone is over 3% on anything under $10), can't be charged on debit cards, and is banned or limited in some states. Built-in prices are legal everywhere, and app buyers pay the same price.
-- **Venmo/Cash App business profiles:** both apps' terms say goods should be sold through a business profile, not a personal one. Business profiles charge a fee (Venmo about 1.9% + 10¢; Cash App 2.75%), but they give buyers purchase protection and keep your account from being limited. Zelle has no purchase protection either way; use it with people you trust.
+- **Fees and the law:** card fees are built into prices instead of being added as a separate "card fee" line. A separate card surcharge would break Visa's 3% cap on almost every order (the 30¢ fixed fee alone is over 3% on anything under $10), can't be charged on debit cards, and is banned or limited in some states. Built-in prices are legal everywhere.
 - **Sales tax:** not collected. Check with whoever does the band's taxes whether West Virginia sales tax applies to your merch sales. If it does, it can be added later.
 
 ---
@@ -209,9 +200,9 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 
 ### 6. Turn the store on
 
-1. In `merch/settings.json`, set `"checkout_api": "https://shop-api.lvnary.com"` and fill in your `pay_apps` handles.
+1. In `merch/settings.json`, set `"checkout_api": "https://shop-api.lvnary.com"`.
 2. In `merch/products.json`, set the real stock for every size, and check the prices.
-3. The five legal pages (`privacy`, `terms`, `cookies`, `accessibility`, `do-not-sell`) have an effective date of October 22, 2026. When a policy changes, update both the text and the `datetime` on its `<time>` tag.
+3. The five legal pages (`privacy`, `terms`, `cookies`, `accessibility`, `do-not-sell`) have effective dates on their pages (October 22, 2026 for most, November 13, 2026 for `privacy` and `terms`). When a policy changes, update both the text and the `datetime` on its `<time>` tag.
 4. Commit everything to `main`.
 
 ### 7. Test the whole thing in test mode
@@ -221,8 +212,7 @@ The deploy sets up the worker at **https://shop-api.lvnary.com**. You can see an
 3. You should land on the "Thanks for your order" page.
 4. Within a minute you should get the order email marked **TEST MODE**, and see a commit "Card order LV-…: lower stock" on GitHub that lowered that size by one.
 5. Try a declined card (`4000 0000 0000 0002`): Stripe shows the error and no order is created.
-6. Try **Pay with Venmo…** with your own address and check the email arrives.
-7. **Put the stock back** in `products.json` for the test orders.
+6. **Put the stock back** in `products.json` for the test orders.
 
 ---
 
@@ -263,7 +253,7 @@ To go back to test mode, put the `sk_test_` key and the test webhook secret back
 
 - **Content-Security-Policy:** every page has a `<meta http-equiv="Content-Security-Policy">` tag near the top. It only lets the browser load this site's own files and talk to the store worker (`shop-api.lvnary.com`). If you add an embed (a Spotify or YouTube player) or an outside script, add its address to that tag on each page that uses it, or the browser blocks it. The home page already allows `https://open.spotify.com` in `frame-src` for the tap-to-load Spotify player; nothing from Spotify loads until someone taps Play. The tests fail if any page breaks its own policy.
 - **One inline script:** the policy allows exactly one inline script, `document.documentElement.classList.add('js');`, by its hash. Put any other script in a file under `js/`.
-- **Worker limits:** card checkout allows 10 tries a minute and signup 3 a minute per connection (`[[ratelimits]]` in `worker/wrangler.toml`). Venmo, Cash App, and Zelle orders allow 5 an hour, since each one holds stock.
+- **Worker limits:** card checkout allows 10 tries a minute and signup 3 a minute per connection (`[[ratelimits]]` in `worker/wrangler.toml`).
 - **Secrets** live only in Cloudflare (`npx wrangler secret put …`), never in this repo.
 
 ## For developers
@@ -278,4 +268,4 @@ npm run worker:dev    # run the worker locally (needs a worker/.dev.vars with th
 
 - `js/store-core.js`: prices, shipping, and stock checks, shared by the page and the worker so totals always match.
 - `js/merch.js`, `css/merch.css`, `merch/`: the store page.
-- `worker/`: the Cloudflare Worker (`/checkout`, `/order`, `/stripe-webhook`). Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GITHUB_TOKEN`.
+- `worker/`: the Cloudflare Worker (`/checkout`, `/stripe-webhook`, `/subscribe`). Secrets: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GITHUB_TOKEN`.

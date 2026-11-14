@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { quote, listedUnitCents, checkStoreFiles, payLink } from '../../js/store-core.js';
+import { quote, listedUnitCents, checkStoreFiles } from '../../js/store-core.js';
 import { fixtureStore } from './fixtures.mjs';
 
 const realProducts = JSON.parse(readFileSync(new URL('../../merch/products.json', import.meta.url)));
@@ -9,13 +9,6 @@ const realSettings = JSON.parse(readFileSync(new URL('../../merch/settings.json'
 
 test('the published store files pass the checks', () => {
   assert.deepEqual(checkStoreFiles(realProducts, realSettings), []);
-});
-
-test('pay links fill in what each app allows', () => {
-  assert.equal(payLink('venmo', '@jvvol', 712, 'LV-XYZ789'), 'https://venmo.com/jvvol?txn=pay&amount=7.12&note=LV-XYZ789');
-  assert.equal(payLink('cash_app', '$jvvol', 2100, 'LV-XYZ789'), 'https://cash.app/$jvvol/21.00');
-  assert.equal(payLink('zelle', '(304) 280-2750', 712, 'LV-XYZ789'), null);
-  assert.equal(payLink('venmo', '@a/b?x', 100, 'LV 1'), 'https://venmo.com/a%2Fb%3Fx?txn=pay&amount=1.00&note=LV%201');
 });
 
 test('listed prices cover the card fee and round up to the step', () => {

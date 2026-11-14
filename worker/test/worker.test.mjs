@@ -183,43 +183,6 @@ test('unpaid sessions are ignored', async () => {
   assert.equal(commits.length, 0);
 });
 
-const p2pOrder = over => ({
-  zone: 'US', app: 'venmo', name: 'Sam Fan', email: 'fan@example.com',
-  address: { line1: '1 High St', city: 'Morgantown', state: 'WV', postal_code: '26505' },
-  cart: [{ id: 'logo-sticker', size: 'One size', qty: 2 }],
-  ...over,
-});
-
-test('a Venmo order gets a number, holds stock, and emails the band', async () => {
-  const res = await handle(post('/order', p2pOrder()), env(), deps);
-  assert.equal(res.status, 200);
-  const body = await res.json();
-  assert.match(body.order, /^LV-[A-Z0-9]{6}$/);
-  assert.equal(body.handle, '@lvnary-test');
-  assert.equal(body.totalCents, 500 + 212);
-  assert.equal(stockOf('logo-sticker', 'One size'), 18);
-  assert.match(emails[0].subject, new RegExp(`New Venmo order ${body.order}: \\$7\\.12, NOT PAID YET`));
-  assert.match(emails[0].text, /Sam Fan\n1 High St\nMorgantown WV 26505\nUnited States/);
-});
-
-test('order form problems come back per field', async () => {
-  const res = await handle(post('/order', p2pOrder({ email: 'nope', address: { line1: '' }, app: 'zelle' })), env(), deps);
-  assert.equal(res.status, 422);
-  const { fieldErrors } = await res.json();
-  assert.equal(fieldErrors.email, 'Enter an email address like name@example.com.');
-  assert.equal(fieldErrors.line1, 'Enter your street address.');
-  assert.equal(fieldErrors.state, 'Enter your state.');
-  // Zelle has no handle in the test settings, so it isn't offered.
-  assert.equal(fieldErrors.app, 'Choose how you’ll pay.');
-  assert.equal(commits.length, 0);
-});
-
-test('bots and floods are turned away', async () => {
-  assert.equal((await handle(post('/order', p2pOrder({ website: 'spam.example' })), env(), deps)).status, 400);
-  for (let i = 0; i < 5; i++) assert.equal((await handle(post('/order', p2pOrder()), env(), deps)).status, 200);
-  assert.equal((await handle(post('/order', p2pOrder()), env(), deps)).status, 429);
-});
-
 test('a signup is saved with the date and what the person agreed to', async () => {
   const res = await handle(post('/subscribe', { email: '  Fan@Example.com ', consent: true }), env(), deps);
   assert.equal(res.status, 200);
@@ -291,9 +254,11 @@ test('a stock change drops the cached read, so the next quote sees the new stock
     return inner(url, init);
   };
   const e = { ...env(), GITHUB_REPO: 'band/cache-drop', STORE_CACHE_SECONDS: '15' };
-  await handle(post('/order', p2pOrder()), e, deps); // quote (2 reads), then the stock hold (1 fresh read)
+  const bag = { zone: 'US', cart: [{ id: 'death-metal-tee', size: 'M', qty: 1 }] };
+  await handle(post('/checkout', bag), e, deps); // quote: 2 reads
+  await handle(await signedWebhook(paidEvent()), e, deps); // lowers stock, so the cache is dropped
   const before = reads;
-  await handle(post('/order', p2pOrder()), e, deps);
+  await handle(post('/checkout', bag), e, deps);
   assert.ok(reads - before >= 2, 'the second quote re-read the store files');
 });
 

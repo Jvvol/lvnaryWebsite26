@@ -106,17 +106,6 @@ export function quote({ cart: rawCart, products, settings, zone }) {
   return { lines, itemsCents, shippingCents, totalCents: itemsCents + shippingCents, shipsAs, freeShipping, problems };
 }
 
-// A link that opens the app with what it allows filled in. Venmo takes an amount and note, Cash App
-// only an amount, and Zelle has no public payment link (null). These are the apps' public links,
-// not a payment integration: the buyer still confirms the payment in the app.
-export function payLink(app, handle, totalCents, order) {
-  const name = encodeURIComponent(String(handle).trim().replace(/^[@$]/, ''));
-  const amount = (totalCents / 100).toFixed(2);
-  if (app === 'venmo') return `https://venmo.com/${name}?txn=pay&amount=${amount}&note=${encodeURIComponent(order)}`;
-  if (app === 'cash_app') return `https://cash.app/$${name}/${amount}`;
-  return null;
-}
-
 export function formatMoney(c) {
   return `$${(c / 100).toFixed(2)}`;
 }
@@ -182,9 +171,6 @@ export function checkStoreFiles(productsFile, settings) {
   else {
     num(free.minimum_order, 'free_shipping minimum_order');
     if (!Array.isArray(free.zones) || free.zones.some(z => !ZONES.includes(z))) errs.push('free_shipping zones can only list "US", "CA", and "WORLD".');
-  }
-  if (!settings.pay_apps || ['venmo', 'cash_app', 'zelle'].some(k => typeof settings.pay_apps[k] !== 'string')) {
-    errs.push('pay_apps needs venmo, cash_app, and zelle (use "" to hide one).');
   }
   if (typeof settings.checkout_api !== 'string') errs.push('checkout_api must be in quotes (use "" to turn checkout off).');
   return errs;
