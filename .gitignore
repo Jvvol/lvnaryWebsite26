@@ -8,3 +8,5 @@ subscribers.csv
 
 # Private: Google Sheets inventory tracker and Apps Script (never publish)
 inventory-tracker/
+TODO.md
+checkout_changes.md
